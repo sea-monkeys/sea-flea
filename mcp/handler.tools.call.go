@@ -3,11 +3,13 @@ package mcp
 import (
 	"encoding/json"
 	"fmt"
+	"sea-flea/config"
 	"sea-flea/jsonrpc"
 	"sea-flea/tools"
+	"sea-flea/utils"
 )
 
-func (s *MCPServer) handleToolsCall(params any) (any, *jsonrpc.JSONRPCError) {
+func (s *MCPServer) handleToolsCall(params any) (map[string]any, *jsonrpc.JSONRPCError) {
 	if !s.initialized {
 		return nil, &jsonrpc.JSONRPCError{
 			Code:    jsonrpc.InvalidRequest,
@@ -44,7 +46,7 @@ func (s *MCPServer) handleToolsCall(params any) (any, *jsonrpc.JSONRPCError) {
 
 }
 
-func (s *MCPServer) executeTool(toolName string, args map[string]any) (any, *jsonrpc.JSONRPCError) {
+func (s *MCPServer) executeTool(toolName string, args map[string]any) (map[string]any, *jsonrpc.JSONRPCError) {
 
 	result, err := s.toolSet[toolName].Handler(args)
 	if err != nil {
@@ -53,14 +55,22 @@ func (s *MCPServer) executeTool(toolName string, args map[string]any) (any, *jso
 			Message: fmt.Sprintf("Error executing tool '%s': %v", toolName, err),
 		}
 	}
-	// Check if the result is a string
-	return tools.ToolCallResult{
-		Content: []tools.ToolContent{
+
+	output := map[string]any{
+		"content": []map[string]any{
 			{
-				Type: "text",
-				Text: result.(string),
+				"type": "text",
+				"text": result.(string),
 			},
 		},
-	}, nil
+	}
+
+	// Log the output
+	utils.Log(func() string {
+		jsonString, _ := utils.GenerateJsonStringFromMap(output)
+		return "📝 tools/call\n" + jsonString
+	}, config.LogOutput)
+
+	return output, nil
 
 }

@@ -6,7 +6,7 @@ import (
 	"sea-flea/utils"
 )
 
-func (s *MCPServer) handlePromptsList() (any, *jsonrpc.JSONRPCError) {
+func (s *MCPServer) handlePromptsList() (map[string]any, *jsonrpc.JSONRPCError) {
 	if !s.initialized {
 		return nil, &jsonrpc.JSONRPCError{
 			Code:    jsonrpc.InvalidRequest,
