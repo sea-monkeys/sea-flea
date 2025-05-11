@@ -1,0 +1,8 @@
+specs/
+tests/
+tickets/
+tmp/
+.devcontainer/
+.vscode/
+.gitignore
+*.sh

@@ -1,0 +1,58 @@
+# docker compose --file ci.compose.yml up --build
+x-comment: |
+  This compose file is a ci pipeline
+
+services:
+
+  # Build the Golang MCP server and copy the binary to a volume
+  copy-go-binary:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+      - ${LOCAL_WORKSPACE_FOLDER}:/app
+    working_dir: /app
+    command:
+      - /bin/sh
+      - -c
+      - |
+        go mod tidy
+        go build
+        mkdir -p /binaries
+        mv sea-flea /binaries/
+        echo "🟢 Go binary copied to volume successfully"
+
+  # Use the binary to run the integration tests
+  integration-tests:
+    image: node:slim
+    working_dir: /app
+    volumes:
+      - go-binaries:/binaries
+    depends_on:
+      copy-go-binary:
+        condition: service_completed_successfully
+    command:
+      - /bin/bash
+      - -c
+      - |
+        npx @modelcontextprotocol/inspector --cli /binaries/sea-flea --method tools/list
+        
+        npx @modelcontextprotocol/inspector \
+            --cli /binaries/sea-flea \
+            --method tools/call \
+            --tool-name hello --tool-arg firstName="Bob" --tool-arg lastName="Morane"
+
+        echo "🟢 Tests are ok"
+
+
+  build-mcp-server-image:
+    image: mcp-sea-flea:demo
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+       integration-tests:
+        condition: service_completed_successfully
+
+volumes:
+  go-binaries:
+    name: go-binaries
