@@ -32,7 +32,7 @@ func (s *MCPServer) handleToolsCall(params any) (any, *jsonrpc.JSONRPCError) {
 		}
 	}
 
-	tool, ok := s.toolSet[toolCall.Name]
+	tool, ok := s.GetTool(toolCall.Name)
 	if !ok {
 		return nil, &jsonrpc.JSONRPCError{
 			Code:    jsonrpc.MethodNotFound,

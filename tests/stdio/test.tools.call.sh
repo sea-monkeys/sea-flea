@@ -28,7 +28,7 @@ echo "Running MCP server with proper initialization sequence..."
 echo "---------------------------------------------------------"
 
 # Pipe the input to the server and process output with jq
-cat /tmp/mcp_test_input.jsonl | go run main.go | jq -s '.'
+cat /tmp/mcp_test_input.jsonl | go run main.go | jq -c '.' | jq -s '.'
 
 # Clean up
 rm /tmp/mcp_test_input.jsonl

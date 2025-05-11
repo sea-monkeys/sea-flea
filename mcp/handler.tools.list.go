@@ -4,6 +4,7 @@ import "sea-flea/jsonrpc"
 
 //func (s *MCPServer) handleToolsList(params any) (any, *jsonrpc.JSONRPCError) {
 
+//TODO: instead of any use structs
 
 func (s *MCPServer) handleToolsList() (any, *jsonrpc.JSONRPCError) {
 	if !s.initialized {

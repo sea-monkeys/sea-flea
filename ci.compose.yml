@@ -5,12 +5,16 @@ x-comment: |
 services:
 
   # Build the Golang MCP server and copy the binary to a volume
-  copy-go-binary:
-    image: golang:1.24.2-alpine
+  generate-binary:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM golang:1.24.2-alpine
+        WORKDIR /app
+        COPY . .
     volumes:
       - go-binaries:/binaries
-      - ${LOCAL_WORKSPACE_FOLDER}:/app
-    working_dir: /app
+    #working_dir: /app
     command:
       - /bin/sh
       - -c
@@ -21,28 +25,170 @@ services:
         mv sea-flea /binaries/
         echo "🟢 Go binary copied to volume successfully"
 
-  # Use the binary to run the integration tests
-  integration-tests:
-    image: node:slim
-    working_dir: /app
+  tools-list:
+    image: golang:1.24.2-alpine
     volumes:
       - go-binaries:/binaries
-    depends_on:
-      copy-go-binary:
-        condition: service_completed_successfully
     command:
-      - /bin/bash
+      - /bin/sh
       - -c
       - |
-        npx @modelcontextprotocol/inspector --cli /binaries/sea-flea --method tools/list
-        
-        npx @modelcontextprotocol/inspector \
-            --cli /binaries/sea-flea \
-            --method tools/call \
-            --tool-name hello --tool-arg firstName="Bob" --tool-arg lastName="Morane"
+        apk add --no-cache jq
+        cd /binaries
 
-        echo "🟢 Tests are ok"
+        cat > mcp_test_tools_list.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "tools/list", 
+            "params": {}
+        }
+        EOF
+        cat mcp_test_tools_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
 
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
+
+  tools-call:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache jq
+        cd /binaries
+
+        cat > mcp_test_tools_call.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "tools/call", "params": {
+                "name": "hello", 
+                "arguments": {"firstName": "Bob", "lastName": "Morane"}
+            }
+        }
+        EOF
+        cat mcp_test_tools_call.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
+
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
+
+
+  resources-list:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache jq
+        cd /binaries
+
+        cat > mcp_test_resources_list.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "resources/list", 
+            "params": {}
+        }
+        EOF
+        cat mcp_test_resources_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
+
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
+
+
+  resources-read:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache jq
+        cd /binaries
+
+        cat > mcp_test_resources_read.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "resources/read", 
+            "params": {
+                "uri": "message:///information"
+            }
+        }
+        EOF
+        cat mcp_test_resources_read.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
+
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
 
   build-mcp-server-image:
     image: mcp-sea-flea:demo
@@ -50,7 +196,13 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-       integration-tests:
+      tools-list:
+        condition: service_completed_successfully
+      tools-call:
+        condition: service_completed_successfully
+      resources-list:
+        condition: service_completed_successfully
+      resources-read:
         condition: service_completed_successfully
 
 volumes:
