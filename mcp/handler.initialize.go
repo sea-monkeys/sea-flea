@@ -18,6 +18,10 @@ func (s *MCPServer) handleInitialize() (any, *jsonrpc.JSONRPCError) {
 		},
 		Capabilities: Capabilities{
 			Tools: map[string]any{},
+			Resources: map[string]any{
+				"subscribe":   false, // optional
+				"listChanged": false, // optional				
+			},
 		},
 	}, nil
 }

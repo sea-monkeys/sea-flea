@@ -1,0 +1,77 @@
+
+  # Use the binary to run the integration tests
+  tools-tests:
+    image: golang:1.24.2-alpine
+    #image: ghcr.io/jqlang/jq:1.7.1
+    working_dir: /app
+    volumes:
+      - go-binaries:/binaries
+      - ${LOCAL_WORKSPACE_FOLDER}:/app
+    depends_on:
+      copy-go-binary:
+        condition: service_completed_successfully
+    command:
+      - /bin/sh
+      - -c
+      - |
+        go mod tidy
+        go build
+        ls
+
+        cat > mcp_test_input.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "resources/list", 
+            "params": {}
+        }
+        EOF
+        cat mcp_test_input.jsonl | ./sea-flea
+
+        # Clean up
+        rm mcp_test_input.jsonl
+        echo "🟢 Tests are ok"
+
+  resources-tests:
+    image: node:slim
+    working_dir: /app
+    volumes:
+      - go-binaries:/binaries
+    depends_on:
+      copy-go-binary:
+        condition: service_completed_successfully
+    command:
+      - /bin/bash
+      - -c
+      - |
+        npx @modelcontextprotocol/inspector --cli /binaries/sea-flea --method resources/list
+        
+        npx @modelcontextprotocol/inspector \
+            --cli /binaries/sea-flea \
+            --method resources/read \
+            --uri message:///information 
+
+        echo "🟢 Tests are ok"
+
+
+
+  build-mcp-server-image:
+    image: mcp-sea-flea:demo
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      tools-tests:
+        condition: service_completed_successfully
+      resources-tests:
+        condition: service_completed_successfully

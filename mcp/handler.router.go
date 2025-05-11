@@ -3,9 +3,9 @@ package mcp
 import (
 	"fmt"
 	"log"
-	"sea-flea/jsonrpc"
 	"sea-flea/config"
-
+	"sea-flea/jsonrpc"
+	"sea-flea/resources"
 )
 
 func (s *MCPServer) HandleRequest(request jsonrpc.JSONRPCRequest) jsonrpc.JSONRPCResponse {
@@ -52,6 +52,30 @@ func (s *MCPServer) HandleRequest(request jsonrpc.JSONRPCRequest) jsonrpc.JSONRP
 	case "ping":
 		// Simple ping response
 		response.Result = map[string]any{}
+
+	case "resources/list":
+
+		result, err := s.handleResourcesList()
+		if err != nil {
+			response.Error = err
+		} else {
+			response.Result = result
+		}
+
+	case "resources/read":
+		var params resources.ResourceReadParams
+		if request.Params == nil {
+			//TODO
+		}
+		// get the URI value from request.Param
+		params.URI = request.Params.(map[string]any)["uri"].(string)
+
+		result, err := s.handleResourcesRead(params)
+		if err != nil {
+			response.Error = err
+		} else {
+			response.Result = result
+		}
 
 	default:
 		response.Error = &jsonrpc.JSONRPCError{

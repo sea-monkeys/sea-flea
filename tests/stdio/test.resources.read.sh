@@ -16,8 +16,10 @@ cat > /tmp/mcp_test_input.jsonl << 'EOF'
 {
     "jsonrpc": "2.0", 
     "id": 2, 
-    "method": "tools/list", 
-    "params": {}
+    "method": "resources/read", 
+    "params": {
+        "uri": "message:///information"
+    }
 }
 EOF
 
