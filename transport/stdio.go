@@ -34,9 +34,13 @@ func STDIO(server *mcp.MCPServer) {
 			continue
 		}
 
-		// Pretty print for debugging
-		requestBytes, _ := json.MarshalIndent(request, "", "  ")
-		log.Printf("Received request: %s", requestBytes)
+		// Log the output
+		utils.Log(func() string {
+			// Pretty print for debugging
+			requestBytes, _ := json.MarshalIndent(request, "", "  ")
+			return "📶 Received request:\n" + string(requestBytes)
+		}, config.LogOutput)
+
 
 		// Validate JSON-RPC version
 		if request.JSONRPC != config.JSONRPCVersion {

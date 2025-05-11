@@ -8,6 +8,7 @@ import (
 	"sea-flea/config"
 	"sea-flea/jsonrpc"
 	"sea-flea/mcp"
+	"sea-flea/utils"
 )
 
 func StreamableHTTP(server *mcp.MCPServer) {
@@ -30,15 +31,22 @@ func StreamableHTTP(server *mcp.MCPServer) {
 			return
 		}
 
-		log.Println("📝",
-			"Received request: Method=", request.Method,
-			"URL=", request.URL.String(),
-			"Headers=", request.Header,
-		)
+		// Log the output
+		utils.Log(func() string {
+			return "🌍 Received HTTP Request:\n" +
+				"  Method= " + request.Method + "\n" +
+				"  URL= " + request.URL.String() + "\n" +
+				"  Headers= " + request.Header.Get("Content-Type") + "\n" +
+				"  Body= " + request.Header.Get("Content-Length") + "\n"
+		}, config.LogOutput)
 
 		if request.Method != http.MethodPost {
 			errorMessage := "Invalid request method"
-			log.Println("😡", errorMessage)
+
+			utils.Log(func() string {
+				return "😡 " + errorMessage
+			}, config.LogOutput)
+
 			http.Error(response, errorMessage, http.StatusMethodNotAllowed)
 			return
 		}
@@ -47,42 +55,68 @@ func StreamableHTTP(server *mcp.MCPServer) {
 
 		if err := json.NewDecoder(request.Body).Decode(&jsonRPCRequest); err != nil {
 			errorMessage := "Invalid JSON-RPC request"
-			log.Println("😡", errorMessage+":", err)
-			http.Error(response, "😡 Invalid JSON-RPC request", http.StatusBadRequest)
+
+			utils.Log(func() string {
+				return "😡 " + errorMessage + ":" + err.Error()
+			}, config.LogOutput)
+
+			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
 		}
 
 		if jsonRPCRequest.JSONRPC != config.JSONRPCVersion {
 			errorMessage := "Invalid JSON-RPC version"
-			log.Println("😡", errorMessage)
+
+			utils.Log(func() string {
+				return "😡 " + errorMessage
+			}, config.LogOutput)
+
 			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
 		}
 
-		log.Printf("Received JSON-RPC request: %+v", jsonRPCRequest)
+		// Log the output
+		utils.Log(func() string {
+			// Pretty print for debugging
+			requestBytes, _ := json.MarshalIndent(jsonRPCRequest, "", "  ")
+			return "📶 Received JSON-RPC request:\n" + string(requestBytes)
+		}, config.LogOutput)
 
+		// 🧭 Handle the request and route it to the appropriate handler
 		jsonRPCResponse := server.HandleRequest(jsonRPCRequest)
 
-		log.Printf("Generated JSON-RPC response: %+v", jsonRPCResponse)
+		utils.Log(func() string {
+			// Pretty print for debugging
+			requestBytes, _ := json.MarshalIndent(jsonRPCResponse, "", "  ")
+			return "Ⓜ️ Generated JSON-RPC response:\n" + string(requestBytes)
+		}, config.LogOutput)
+
 
 		if jsonRPCResponse.Error != nil {
 			errorMessage := "Error in JSON-RPC response"
-			log.Println("😡", errorMessage+":", jsonRPCResponse.Error)
+
+			utils.Log(func() string {
+				return "😡 " + errorMessage + ":" + jsonRPCResponse.Error.Message
+			}, config.LogOutput)
+
 			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
 		}
 
 		if err := json.NewEncoder(response).Encode(jsonRPCResponse); err != nil {
 			errorMessage := "Error in JSON-RPC response"
-			log.Println("😡", errorMessage+":", err)
+
+			utils.Log(func() string {
+				return "😡 " + errorMessage + ":" + err.Error()
+			}, config.LogOutput)
+
 			http.Error(response, errorMessage, http.StatusInternalServerError)
 		}
 
 		//handlers.MainHandler(response, request)
 	})
 
-	var errListening error
 	log.Println("🌍 Streamable HTTP MCP server is listening on: " + httpPort)
-	errListening = http.ListenAndServe(":"+httpPort, mux)
-	log.Fatalln("😡", errListening)
+	errListening := http.ListenAndServe(":"+httpPort, mux)
+	log.Fatalln(errListening)
 }
