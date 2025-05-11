@@ -193,9 +193,6 @@ func main() {
 		},
 	}
 
-
-
-
 	server.AddPrompt(basicPrompt)
 	server.AddPrompt(helloPrompt)
 
