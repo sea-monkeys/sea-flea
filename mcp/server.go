@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"sea-flea/prompts"
 	"sea-flea/resources"
 	"sea-flea/tools"
 )
@@ -8,7 +9,7 @@ import (
 // MCP specific types
 type InitializeParams struct {
 	ProtocolVersion string      `json:"protocolVersion"`
-	Capabilities    any `json:"capabilities"`
+	Capabilities    Capabilities `json:"capabilities"`
 	ClientInfo      ClientInfo  `json:"clientInfo"`
 }
 
@@ -31,6 +32,7 @@ type ServerInfo struct {
 type Capabilities struct {
 	Tools map[string]any `json:"tools"`
 	Resources map[string]any `json:"resources"`
+	Prompts map[string]any `json:"prompts"`
 }
 
 // Server state
@@ -39,12 +41,14 @@ type MCPServer struct {
 	//tools       []Tool
 	toolSet map[string]tools.Tool
 	resourceSet map[string]resources.Resource
+	promptSet map[string]prompts.Prompt
 }
 
 func NewMCPServer() *MCPServer {
 	return &MCPServer{
 		toolSet: make(map[string]tools.Tool),
 		resourceSet: make(map[string]resources.Resource),
+		promptSet: make(map[string]prompts.Prompt),
 	}
 }
 
@@ -64,4 +68,12 @@ func (s *MCPServer) AddResource(resource resources.Resource) {
 func (s *MCPServer) GetResource(uri string) (resources.Resource, bool) {
 	resource, ok := s.resourceSet[uri]
 	return resource, ok
+}
+
+func (s *MCPServer) AddPrompt(prompt prompts.Prompt) {
+	s.promptSet[prompt.Name] = prompt
+}
+func (s *MCPServer) GetPrompt(name string) (prompts.Prompt, bool) {
+	prompt, ok := s.promptSet[name]
+	return prompt, ok
 }

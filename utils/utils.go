@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"sea-flea/config"
 	"sea-flea/jsonrpc"
@@ -35,5 +36,20 @@ func SendError(encoder *json.Encoder, id any, code int, message string) {
 	}
 	if err := SendResponse(encoder, response); err != nil {
 		log.Printf("Failed to send error response: %v", err)
+	}
+}
+
+func GenerateJsonStringFromMap(output map[string]any) (string, error) {
+
+	jsonString, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("error generating JSON string: %v", err)
+	}
+	return string(jsonString), nil
+}
+
+func Log(callbck func() string, debug bool) {
+	if debug {
+		log.Println(callbck())
 	}
 }

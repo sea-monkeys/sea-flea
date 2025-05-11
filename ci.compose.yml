@@ -190,6 +190,93 @@ services:
       generate-binary:
         condition: service_completed_successfully
 
+  prompts-list:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache jq
+        cd /binaries
+
+        cat > mcp_test_prompts_list.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "prompts/list", 
+            "params": {}
+        }
+        EOF
+        cat mcp_test_prompts_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
+
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
+
+
+  prompts-get:
+    image: golang:1.24.2-alpine
+    volumes:
+      - go-binaries:/binaries
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache jq
+        cd /binaries
+
+        cat > mcp_test_prompts_get.jsonl << 'EOF'
+        {
+            "jsonrpc": "2.0", 
+            "id": 0, 
+            "method": "initialize", 
+            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
+        }
+        {
+            "jsonrpc": "2.0", 
+            "method": "notifications/initialized"
+        }
+        {
+            "jsonrpc": "2.0", 
+            "id": 2, 
+            "method": "prompts/get", 
+            "params": {
+                "name": "basic_prompt",
+                "arguments": {
+                    "message": "Hello, World!"
+                }
+            }
+        }
+        EOF
+        cat mcp_test_prompts_get.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        if [ $? -eq 0 ]; then
+          echo "🟢 Test passed successfully"
+        else
+          echo "🔴 Test failed"
+        fi
+
+    depends_on:
+      generate-binary:
+        condition: service_completed_successfully
+
+
   build-mcp-server-image:
     image: mcp-sea-flea:demo
     build:
@@ -204,7 +291,11 @@ services:
         condition: service_completed_successfully
       resources-read:
         condition: service_completed_successfully
-
+      prompts-list:
+        condition: service_completed_successfully
+      prompts-get:
+        condition: service_completed_successfully
+        
 volumes:
   go-binaries:
     name: go-binaries

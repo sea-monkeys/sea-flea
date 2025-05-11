@@ -1,7 +1,6 @@
 package mcp
 
 import (
-	"fmt"
 	"sea-flea/jsonrpc"
 	"sea-flea/resources"
 )
@@ -16,8 +15,6 @@ func (s *MCPServer) handleResourcesRead(params resources.ResourceReadParams) (re
 		}
 	}
 
-	fmt.Println("🎃 handleResourcesRead called with params:", params)
-
 	// Get the resource from the resource set
 	resource, ok := s.GetResource(params.URI)
 	if !ok {
@@ -26,8 +23,6 @@ func (s *MCPServer) handleResourcesRead(params resources.ResourceReadParams) (re
 			Message: "Resource not found",
 		}
 	}
-
-	fmt.Println("🤖 handleResourcesRead found resource:", resource)
 
 	resourceContent, err := resource.ContentHandler(map[string]any{
 		"uri": params.URI,
@@ -38,7 +33,6 @@ func (s *MCPServer) handleResourcesRead(params resources.ResourceReadParams) (re
 			Message: "Error reading resource",
 		}
 	}
-	fmt.Println("🟩 handleResourcesRead content:", resourceContent)
 
 	return resources.ResourceReadResult{
 		Contents: []resources.ResourceContent{
