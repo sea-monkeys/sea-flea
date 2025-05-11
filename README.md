@@ -29,6 +29,7 @@ docker build -t mcp-sea-flea:demo .
   }
 }
 ```
+> in inspector: docker run --rm -i mcp-sea-flea:demo
 
 ## Streamable HTTP
 > 🚧 work in progress
