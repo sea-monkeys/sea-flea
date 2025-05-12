@@ -1,0 +1,20 @@
+https://github.com/FiloSottile/mkcert
+
+> on macOS
+```bash
+brew install mkcert
+mkcert -install
+```
+
+```bash
+mkcert \
+-cert-file mcp.sea-flea.local.crt \
+-key-file mcp.sea-flea.local.key \
+sea-flea.local "*.sea-flea.local" localhost 127.0.0.1 ::1
+```
+
+Then add the following line to your `/etc/hosts` file:
+
+```bash
+0.0.0.0 mcp.sea-flea.local
+```
