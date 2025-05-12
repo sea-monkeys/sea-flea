@@ -9,14 +9,29 @@ import (
 	"sea-flea/jsonrpc"
 	"sea-flea/mcp"
 	"sea-flea/utils"
+	"strings"
 )
 
 func StreamableHTTP(server *mcp.MCPServer) {
 
-	var httpPort = os.Getenv("MCP_HTTP_PORT")
+	httpPort := os.Getenv("MCP_HTTP_PORT")
 	if httpPort == "" {
 		httpPort = "5050"
 	}
+	// Add token configuration
+	authToken := os.Getenv("MCP_TOKEN")
+	if authToken == "" {
+		utils.Log(func() string {
+			return "🔒 MCP_TOKEN environment variable should be set"
+		}, server.LogOutput())
+	}
+	/*
+		curl -X POST http://localhost:5050/mcp \
+		-H "Authorization: Bearer your-secret-token-here" \
+		-H "Content-Type: application/json" \
+		-d '{"jsonrpc": "2.0", ...}'
+	*/
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /mcp", func(response http.ResponseWriter, request *http.Request) {
@@ -29,6 +44,23 @@ func StreamableHTTP(server *mcp.MCPServer) {
 		if request.Method == http.MethodOptions {
 			response.WriteHeader(http.StatusOK)
 			return
+		}
+
+		if authToken != "" {
+			// Check Authorization header
+			authHeader := request.Header.Get("Authorization")
+
+			if !strings.HasPrefix(authHeader, "Bearer ") || strings.TrimPrefix(authHeader, "Bearer ") != authToken {
+
+				errorMessage := "Unauthorized: Invalid or missing Bearer token"
+
+				utils.Log(func() string {
+					return "🔒 " + errorMessage
+				}, server.LogOutput())
+
+				http.Error(response, errorMessage, http.StatusUnauthorized)
+				return
+			}
 		}
 
 		// Log the output
@@ -90,7 +122,6 @@ func StreamableHTTP(server *mcp.MCPServer) {
 			requestBytes, _ := json.MarshalIndent(jsonRPCResponse, "", "  ")
 			return "Ⓜ️ Generated JSON-RPC response:\n" + string(requestBytes)
 		}, server.LogOutput())
-
 
 		if jsonRPCResponse.Error != nil {
 			errorMessage := "Error in JSON-RPC response"

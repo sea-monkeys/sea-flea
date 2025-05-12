@@ -25,7 +25,7 @@ ENV LC_CTYPE=en_US.UTF-8
 # ------------------------------------
 RUN <<EOF
 apt-get update 
-apt-get install -y curl wget jq git build-essential xz-utils bat software-properties-common sudo sshpass
+apt-get install -y curl wget jq git build-essential xz-utils bat software-properties-common sudo sshpass unzip
 ln -s /usr/bin/batcat /usr/bin/bat
 
 apt-get clean autoclean
