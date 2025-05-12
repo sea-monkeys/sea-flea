@@ -7,6 +7,7 @@ import (
 	"sea-flea/demo"
 	"sea-flea/mcp"
 	"sea-flea/transport"
+	"sea-flea/wasm"
 	"strings"
 )
 
@@ -27,19 +28,19 @@ func main() {
 	}
 
 	/*
-	fmt.Printf("Configuration:\n")
-	fmt.Printf("  Transport: %s\n", cfg.Transport)
-	fmt.Printf("  HTTP Port: %d\n", cfg.HTTPPort)
-	fmt.Printf("  Debug: %t\n", cfg.Debug)
-	fmt.Printf("  Plugins Path: %s\n", cfg.PluginsPath)
-	fmt.Printf("  Filter: %s\n", cfg.Filter)
-	fmt.Printf("  Load Demo Tools: %t\n", cfg.DemoTools)
-	fmt.Printf("  Load Demo Resources: %t\n", cfg.DemoResources)
-	fmt.Printf("  Load Demo Prompts: %t\n", cfg.DemoPrompts)
+		fmt.Printf("Configuration:\n")
+		fmt.Printf("  Transport: %s\n", cfg.Transport)
+		fmt.Printf("  HTTP Port: %d\n", cfg.HTTPPort)
+		fmt.Printf("  Debug: %t\n", cfg.Debug)
+		fmt.Printf("  Plugins Path: %s\n", cfg.PluginsPath)
+		fmt.Printf("  Filter: %s\n", cfg.Filter)
+		fmt.Printf("  Load Demo Tools: %t\n", cfg.DemoTools)
+		fmt.Printf("  Load Demo Resources: %t\n", cfg.DemoResources)
+		fmt.Printf("  Load Demo Prompts: %t\n", cfg.DemoPrompts)
 	*/
 
 	// Create server instance
-	server := mcp.NewMCPServer(cfg.Debug)
+	server := mcp.NewMCPServer(cfg)
 
 	if cfg.DemoTools {
 		demo.LoadTools(server)
@@ -51,6 +52,11 @@ func main() {
 
 	if cfg.DemoPrompts {
 		demo.LoadPrompts(server)
+	}
+
+	// Load WASM plugins if the path is provided
+	if cfg.PluginsPath != "" {
+		wasm.LoadPlugins(server)
 	}
 
 	// Run the appropriate transport based on the config

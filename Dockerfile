@@ -11,4 +11,6 @@ EOF
 FROM scratch
 WORKDIR /app
 COPY --from=builder /app/sea-flea .
+# 🚧 Work in progress
+COPY plugins/*.wasm ./plugins/
 ENTRYPOINT ["./sea-flea"]
