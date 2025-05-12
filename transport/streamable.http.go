@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func StreamableHTTP(server *mcp.MCPServer) {
+func StreamableHTTP(server *mcp.MCPServer, cert, key string) {
 
 	httpPort := os.Getenv("MCP_HTTP_PORT")
 	if httpPort == "" {
@@ -147,7 +147,17 @@ func StreamableHTTP(server *mcp.MCPServer) {
 		//handlers.MainHandler(response, request)
 	})
 
-	log.Println("🌍 Streamable HTTP MCP server is listening on: " + httpPort)
-	errListening := http.ListenAndServe(":"+httpPort, mux)
-	log.Fatalln(errListening)
+	var errListening error
+
+	if cert != "" && key != "" {
+		log.Println("🔒 Streamable HTTP MCP server is listening on: " + httpPort)
+		//log.Println("🔒 Using TLS with cert: " + cert + " and key: " + key)
+		errListening = http.ListenAndServeTLS(":"+httpPort, cert, key, mux)
+		log.Fatalln(errListening)
+	} else {
+		log.Println("🌍 Streamable HTTP MCP server is listening on: " + httpPort)
+		errListening = http.ListenAndServe(":"+httpPort, mux)
+		log.Fatalln(errListening)
+	}
+
 }

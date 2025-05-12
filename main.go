@@ -58,7 +58,7 @@ func main() {
 	case "stdio":
 		transport.STDIO(server)
 	case "streamable-http":
-		transport.StreamableHTTP(server)
+		transport.StreamableHTTP(server, cfg.CertFile, cfg.KeyFile)
 	default:
 		panic("Invalid mcp transport.")
 	}

@@ -15,7 +15,22 @@ type Config struct {
 	DemoTools bool
 	DemoResources bool
 	DemoPrompts bool
+	// cert and key for TLS
+	CertFile string
+	KeyFile  string
 }
+
+/*
+```bash
+mkcert \
+-cert-file mcp.amphipod.local.crt \
+-key-file mcp.amphipod.local.key \
+amphipod.local "*.amphipod.local" localhost 127.0.0.1 ::1
+```
+
+*/
+
+
 
 // ParseFlags parses command line arguments and returns a Config
 func ParseFlags() (*Config, error) {
@@ -31,6 +46,10 @@ func ParseFlags() (*Config, error) {
 	flag.BoolVar(&cfg.DemoTools, "demo-tools", false, "Load demo tools")
 	flag.BoolVar(&cfg.DemoResources, "demo-resources", false, "Load demo resources")
 	flag.BoolVar(&cfg.DemoPrompts, "demo-prompts", false, "Load demo prompts")
+
+	// TLS flags
+	flag.StringVar(&cfg.CertFile, "cert", "", "Path to TLS certificate file")
+	flag.StringVar(&cfg.KeyFile, "key", "", "Path to TLS key file")
 
 
 	// Parse flags
