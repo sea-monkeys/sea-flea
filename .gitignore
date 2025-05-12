@@ -1,2 +1,5 @@
 modelcontextprotocol/
 backup/
+inspector/
+*.crt
+*.key

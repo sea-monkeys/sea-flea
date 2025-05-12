@@ -36,13 +36,24 @@ docker build -t mcp-sea-flea:demo .
 > With inspector: `docker run --rm -i mcp-sea-flea:demo --debug --demo-tools --demo-resources --demo-prompts`
 
 
-
-
 ## Streamable HTTP
 > 🚧 work in progress
 
+### Start
+
 - activate the transport with the `--transport streamable-http` option
 - default HTTP port: `5050`, use the `--http-port <PORT>` option to change it
+
+
+### Bearer Token
+
+```bash
+MCP_TOKEN="mcp-is-the-way" sea-fleat --transport streamable-http \
+--debug \
+--demo-tools \
+--demo-resources \
+--demo-prompts
+```
 
 ## CI and Tests
 > 🚧 work in progress
