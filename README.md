@@ -41,7 +41,8 @@ docker build -t mcp-sea-flea:demo .
 ## Streamable HTTP
 > 🚧 work in progress
 
-- default HTTP port: `5050`, use the `MCP_HTTP_PORT` environment variable to change it
+- activate the transport with the `--transport streamable-http` option
+- default HTTP port: `5050`, use the `--http-port <PORT>` option to change it
 
 ## CI and Tests
 > 🚧 work in progress
@@ -76,7 +77,7 @@ cat > /tmp/mcp_test_input.jsonl << 'EOF'
     "params": {}
 }
 EOF
-cat /tmp/mcp_test_input.jsonl | go run main.go | jq -s '.'
+cat /tmp/mcp_test_input.jsonl | go run main.go --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -s '.'
 rm /tmp/mcp_test_input.jsonl
 ```
 
