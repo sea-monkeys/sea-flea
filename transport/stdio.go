@@ -39,8 +39,7 @@ func STDIO(server *mcp.MCPServer) {
 			// Pretty print for debugging
 			requestBytes, _ := json.MarshalIndent(request, "", "  ")
 			return "📶 Received request:\n" + string(requestBytes)
-		}, config.LogOutput)
-
+		}, server.LogOutput())
 
 		// Validate JSON-RPC version
 		if request.JSONRPC != config.JSONRPCVersion {

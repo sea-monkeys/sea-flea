@@ -1,3 +1,3 @@
 #!/bin/bash
-MCP_MODE=STREAMABLE_HTTP go run main.go
+go run main.go --transport streamable-http --debug --demo-tools --demo-resources --demo-prompts
 

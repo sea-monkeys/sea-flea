@@ -1,7 +1,6 @@
 package mcp
 
 import (
-	"sea-flea/config"
 	"sea-flea/jsonrpc"
 	"sea-flea/utils"
 )
@@ -39,7 +38,7 @@ func (s *MCPServer) handleResourcesList() (map[string]any, *jsonrpc.JSONRPCError
 	utils.Log(func() string {
 		jsonString, _ := utils.GenerateJsonStringFromMap(output)
 		return "📝 resources/list\n" + jsonString
-	}, config.LogOutput)
+	}, s.logOutput)
 
 	return output, nil
 

@@ -154,5 +154,10 @@ func (s *MCPServer) HandleRequest(request jsonrpc.JSONRPCRequest) jsonrpc.JSONRP
 		}
 	}
 
+	if response.Error != nil {
+		// Log the error
+		log.Printf("🔴 🆘 Error handling request: %v", response.Error)
+	}
+
 	return response
 }
