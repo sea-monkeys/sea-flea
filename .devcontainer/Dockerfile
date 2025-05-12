@@ -7,6 +7,8 @@ ARG TARGETOS
 ARG TARGETARCH
 
 ARG GO_VERSION=${GO_VERSION}
+ARG TINYGO_VERSION=${TINYGO_VERSION}
+ARG EXTISM_VERSION=${EXTISM_VERSION}
 ARG NODE_MAJOR=${NODE_MAJOR}
 
 ARG USER_NAME=${USER_NAME}
@@ -56,6 +58,31 @@ go install -v github.com/ramya-rao-a/go-outline@latest
 go install -v github.com/stamblerre/gocode@v1.0.0
 go install -v github.com/mgechev/revive@v1.3.2
 EOF
+
+
+# ------------------------------------
+# Install TinyGo
+# ------------------------------------
+RUN <<EOF
+wget https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo_${TINYGO_VERSION}_${TARGETARCH}.deb
+dpkg -i tinygo_${TINYGO_VERSION}_${TARGETARCH}.deb
+rm tinygo_${TINYGO_VERSION}_${TARGETARCH}.deb
+EOF
+
+
+# ------------------------------------
+# Install Extism CLI
+# ------------------------------------
+RUN <<EOF
+wget https://github.com/extism/cli/releases/download/v${EXTISM_VERSION}/extism-v${EXTISM_VERSION}-linux-${TARGETARCH}.tar.gz
+    
+tar -xf extism-v${EXTISM_VERSION}-linux-${TARGETARCH}.tar.gz -C /usr/bin
+rm extism-v${EXTISM_VERSION}-linux-${TARGETARCH}.tar.gz
+    
+#extism --version
+EOF
+
+
 
 # ------------------------------------
 # Install NodeJS

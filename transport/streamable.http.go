@@ -13,7 +13,7 @@ import (
 
 func StreamableHTTP(server *mcp.MCPServer) {
 
-	var httpPort = os.Getenv("HTTP_PORT")
+	var httpPort = os.Getenv("MCP_HTTP_PORT")
 	if httpPort == "" {
 		httpPort = "5050"
 	}

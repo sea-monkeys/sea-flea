@@ -34,6 +34,8 @@ docker build -t mcp-sea-flea:demo .
 ## Streamable HTTP
 > 🚧 work in progress
 
+- default HTTP port: `5050`, use the `MCP_HTTP_PORT` environment variable to change it
+
 ## CI and Tests
 > 🚧 work in progress
 
