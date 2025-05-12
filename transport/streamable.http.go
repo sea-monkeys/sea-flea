@@ -38,14 +38,14 @@ func StreamableHTTP(server *mcp.MCPServer) {
 				"  URL= " + request.URL.String() + "\n" +
 				"  Headers= " + request.Header.Get("Content-Type") + "\n" +
 				"  Body= " + request.Header.Get("Content-Length") + "\n"
-		}, config.LogOutput)
+		}, server.LogOutput())
 
 		if request.Method != http.MethodPost {
 			errorMessage := "Invalid request method"
 
 			utils.Log(func() string {
 				return "😡 " + errorMessage
-			}, config.LogOutput)
+			}, server.LogOutput())
 
 			http.Error(response, errorMessage, http.StatusMethodNotAllowed)
 			return
@@ -58,7 +58,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 
 			utils.Log(func() string {
 				return "😡 " + errorMessage + ":" + err.Error()
-			}, config.LogOutput)
+			}, server.LogOutput())
 
 			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
@@ -69,7 +69,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 
 			utils.Log(func() string {
 				return "😡 " + errorMessage
-			}, config.LogOutput)
+			}, server.LogOutput())
 
 			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
@@ -80,7 +80,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 			// Pretty print for debugging
 			requestBytes, _ := json.MarshalIndent(jsonRPCRequest, "", "  ")
 			return "📶 Received JSON-RPC request:\n" + string(requestBytes)
-		}, config.LogOutput)
+		}, server.LogOutput())
 
 		// 🧭 Handle the request and route it to the appropriate handler
 		jsonRPCResponse := server.HandleRequest(jsonRPCRequest)
@@ -89,7 +89,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 			// Pretty print for debugging
 			requestBytes, _ := json.MarshalIndent(jsonRPCResponse, "", "  ")
 			return "Ⓜ️ Generated JSON-RPC response:\n" + string(requestBytes)
-		}, config.LogOutput)
+		}, server.LogOutput())
 
 
 		if jsonRPCResponse.Error != nil {
@@ -97,7 +97,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 
 			utils.Log(func() string {
 				return "😡 " + errorMessage + ":" + jsonRPCResponse.Error.Message
-			}, config.LogOutput)
+			}, server.LogOutput())
 
 			http.Error(response, errorMessage, http.StatusBadRequest)
 			return
@@ -108,7 +108,7 @@ func StreamableHTTP(server *mcp.MCPServer) {
 
 			utils.Log(func() string {
 				return "😡 " + errorMessage + ":" + err.Error()
-			}, config.LogOutput)
+			}, server.LogOutput())
 
 			http.Error(response, errorMessage, http.StatusInternalServerError)
 		}

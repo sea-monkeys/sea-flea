@@ -54,7 +54,7 @@ services:
             "params": {}
         }
         EOF
-        cat mcp_test_tools_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_tools_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -95,7 +95,7 @@ services:
             }
         }
         EOF
-        cat mcp_test_tools_call.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_tools_call.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -136,7 +136,7 @@ services:
             "params": {}
         }
         EOF
-        cat mcp_test_resources_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_resources_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -179,7 +179,7 @@ services:
             }
         }
         EOF
-        cat mcp_test_resources_read.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_resources_read.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -219,7 +219,7 @@ services:
             "params": {}
         }
         EOF
-        cat mcp_test_prompts_list.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_prompts_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -265,7 +265,7 @@ services:
             }
         }
         EOF
-        cat mcp_test_prompts_get.jsonl | ./sea-flea | jq -c '.' | jq -s '.'
+        cat mcp_test_prompts_get.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else

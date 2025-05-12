@@ -2,7 +2,6 @@ package mcp
 
 import (
 	"fmt"
-	"sea-flea/config"
 	"sea-flea/jsonrpc"
 	"sea-flea/prompts"
 	"sea-flea/utils"
@@ -51,8 +50,8 @@ func (s *MCPServer) handlePromptsGet(params prompts.PromptGetParams) (map[string
 	// Log the output
 	utils.Log(func() string {
 		jsonString, _ := utils.GenerateJsonStringFromMap(output)
-		return "📝 prompts/get\n"+jsonString
-	}, config.LogOutput)
+		return "📝 prompts/get\n" + jsonString
+	}, s.logOutput)
 
 	return output, nil
 

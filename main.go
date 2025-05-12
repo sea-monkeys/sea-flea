@@ -1,42 +1,66 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"sea-flea/config"
+	"sea-flea/cli"
 	"sea-flea/demo"
 	"sea-flea/mcp"
 	"sea-flea/transport"
+	"strings"
 )
 
 func main() {
 
-	// Create server instance
-	server := mcp.NewMCPServer()
+	cfg, err := cli.ParseFlags()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
 
-	if config.LoadDemoTools {
+	// Handle filters
+	filters := strings.SplitSeq(cfg.Filter, ",")
+	for filter := range filters {
+		filter = strings.TrimSpace(filter)
+		//fmt.Printf("Processing filter: %s\n", filter)
+		// Add your filter processing logic here
+	}
+
+	/*
+	fmt.Printf("Configuration:\n")
+	fmt.Printf("  Transport: %s\n", cfg.Transport)
+	fmt.Printf("  HTTP Port: %d\n", cfg.HTTPPort)
+	fmt.Printf("  Debug: %t\n", cfg.Debug)
+	fmt.Printf("  Plugins Path: %s\n", cfg.PluginsPath)
+	fmt.Printf("  Filter: %s\n", cfg.Filter)
+	fmt.Printf("  Load Demo Tools: %t\n", cfg.DemoTools)
+	fmt.Printf("  Load Demo Resources: %t\n", cfg.DemoResources)
+	fmt.Printf("  Load Demo Prompts: %t\n", cfg.DemoPrompts)
+	*/
+
+	// Create server instance
+	server := mcp.NewMCPServer(cfg.Debug)
+
+	if cfg.DemoTools {
 		demo.LoadTools(server)
 	}
 
-	if config.LoadDemoResources {
+	if cfg.DemoResources {
 		demo.LoadResources(server)
 	}
 
-	if config.LoadDemoPrompts {
+	if cfg.DemoPrompts {
 		demo.LoadPrompts(server)
 	}
 
-	mcpMode := os.Getenv("MCP_MODE")
-	if mcpMode == "" {
-		mcpMode = "STDIO"
-	}
-
-	switch mcpMode {
-	case "STREAMABLE_HTTP":
-		transport.StreamableHTTP(server)
-	case "STDIO":
+	// Run the appropriate transport based on the config
+	switch cfg.Transport {
+	case "stdio":
 		transport.STDIO(server)
+	case "streamable-http":
+		transport.StreamableHTTP(server)
 	default:
-		panic("Invalid MCP_MODE. Use 'STREAMABLE_HTTP' or 'STDIO'.")
+		panic("Invalid mcp transport.")
 	}
 
 }

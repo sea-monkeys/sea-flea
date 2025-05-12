@@ -23,13 +23,20 @@ docker build -t mcp-sea-flea:demo .
         "run",
         "--rm",
         "-i",
-        "mcp-sea-flea:demo"
+        "mcp-sea-flea:demo",
+        "--debug",
+        "--demo-tools",
+        "--demo-resources",
+        "--demo-prompts"
       ]
     }
   }
 }
 ```
-> With inspector: `docker run --rm -i mcp-sea-flea:demo`
+> With inspector: `docker run --rm -i mcp-sea-flea:demo --debug --demo-tools --demo-resources --demo-prompts`
+
+
+
 
 ## Streamable HTTP
 > 🚧 work in progress

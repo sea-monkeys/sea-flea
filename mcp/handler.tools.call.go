@@ -3,7 +3,6 @@ package mcp
 import (
 	"encoding/json"
 	"fmt"
-	"sea-flea/config"
 	"sea-flea/jsonrpc"
 	"sea-flea/tools"
 	"sea-flea/utils"
@@ -69,7 +68,7 @@ func (s *MCPServer) executeTool(toolName string, args map[string]any) (map[strin
 	utils.Log(func() string {
 		jsonString, _ := utils.GenerateJsonStringFromMap(output)
 		return "📝 tools/call\n" + jsonString
-	}, config.LogOutput)
+	}, s.logOutput)
 
 	return output, nil
 

@@ -7,9 +7,5 @@ const (
 	ServerName      = "sea-flea-stdio-mcp-server"
 	ServerVersion   = "0.0.0"
 	JSONRPCVersion  = "2.0"
-	LogOutput = true
 
-	LoadDemoTools = true
-	LoadDemoResources = true
-	LoadDemoPrompts = true
 )

@@ -42,14 +42,22 @@ type MCPServer struct {
 	toolSet map[string]tools.Tool
 	resourceSet map[string]resources.Resource
 	promptSet map[string]prompts.Prompt
+
+	logOutput bool
 }
 
-func NewMCPServer() *MCPServer {
+func NewMCPServer(logOutput bool) *MCPServer {
 	return &MCPServer{
 		toolSet: make(map[string]tools.Tool),
 		resourceSet: make(map[string]resources.Resource),
 		promptSet: make(map[string]prompts.Prompt),
+
+		logOutput: logOutput,
 	}
+}
+
+func (s *MCPServer) LogOutput() bool {
+	return s.logOutput
 }
 
 func (s *MCPServer) AddTool(tool tools.Tool) {
