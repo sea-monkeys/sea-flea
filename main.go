@@ -12,7 +12,12 @@ import (
 
 func main() {
 
+	// Create server instance
+	server := mcp.NewMCPServer()
+
+	// ------------------------------------------------
 	// Define the tools
+	// ------------------------------------------------
 	calculatorTool := tools.Tool{
 		Name:        "add",
 		Description: "Perform addition of two numbers",
@@ -88,14 +93,13 @@ func main() {
 		},
 	}
 
-	// Create server instance
-	server := mcp.NewMCPServer()
+
 	server.AddTool(calculatorTool)
 	server.AddTool(helloTool)
 	server.AddTool(vulcanSaluteTool)
 
 	// ------------------------------------------------
-	// Add resources to the server
+	// Define the resources
 	// ------------------------------------------------
 	greetingResource := resources.Resource{
 		URI:         "message:///greeting",
@@ -132,8 +136,9 @@ func main() {
 	server.AddResource(greetingResource)
 	server.AddResource(informationResource)
 
-
-
+	// ------------------------------------------------
+	// Define the prompts
+	// ------------------------------------------------
 	basicPrompt := prompts.Prompt{
 		Name:        "basic_prompt",
 		Description: "A basic prompt example",
