@@ -2,9 +2,10 @@ package prompts
 
 // Prompt represents a single prompt definition
 type Prompt struct {
-	Name        string           `json:"name"`
-	Description string           `json:"description,omitempty"`
-	Arguments   []map[string]any `json:"arguments"`
+	Name           string           `json:"name"`
+	Description    string           `json:"description,omitempty"`
+	Arguments      []map[string]any `json:"arguments"`
+	Role           string           `json:"role,omitempty"`
 	ContentHandler func(map[string]any) ([]map[string]any, error)
 	//Schema      map[string]any   `json:"schema,omitempty"`
 }
@@ -14,4 +15,3 @@ type PromptGetParams struct {
 	Name      string           `json:"name"`
 	Arguments []map[string]any `json:"arguments"`
 }
-

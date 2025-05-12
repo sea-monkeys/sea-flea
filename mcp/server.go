@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"sea-flea/cli"
 	"sea-flea/prompts"
 	"sea-flea/resources"
 	"sea-flea/tools"
@@ -8,9 +9,9 @@ import (
 
 // MCP specific types
 type InitializeParams struct {
-	ProtocolVersion string      `json:"protocolVersion"`
+	ProtocolVersion string       `json:"protocolVersion"`
 	Capabilities    Capabilities `json:"capabilities"`
-	ClientInfo      ClientInfo  `json:"clientInfo"`
+	ClientInfo      ClientInfo   `json:"clientInfo"`
 }
 
 type ClientInfo struct {
@@ -30,34 +31,41 @@ type ServerInfo struct {
 }
 
 type Capabilities struct {
-	Tools map[string]any `json:"tools"`
+	Tools     map[string]any `json:"tools"`
 	Resources map[string]any `json:"resources"`
-	Prompts map[string]any `json:"prompts"`
+	Prompts   map[string]any `json:"prompts"`
 }
 
 // Server state
 type MCPServer struct {
 	initialized bool
 	//tools       []Tool
-	toolSet map[string]tools.Tool
+	toolSet     map[string]tools.Tool
 	resourceSet map[string]resources.Resource
-	promptSet map[string]prompts.Prompt
+	promptSet   map[string]prompts.Prompt
 
 	logOutput bool
+
+	pluginsPath string
 }
 
-func NewMCPServer(logOutput bool) *MCPServer {
+func NewMCPServer(cfg *cli.Config) *MCPServer {
 	return &MCPServer{
-		toolSet: make(map[string]tools.Tool),
+		toolSet:     make(map[string]tools.Tool),
 		resourceSet: make(map[string]resources.Resource),
-		promptSet: make(map[string]prompts.Prompt),
+		promptSet:   make(map[string]prompts.Prompt),
 
-		logOutput: logOutput,
+		logOutput:   cfg.Debug,
+		pluginsPath: cfg.PluginsPath,
 	}
 }
 
 func (s *MCPServer) LogOutput() bool {
 	return s.logOutput
+}
+
+func (s *MCPServer) PluginsPath() string {
+	return s.pluginsPath
 }
 
 func (s *MCPServer) AddTool(tool tools.Tool) {
