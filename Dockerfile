@@ -1,4 +1,4 @@
-FROM golang:1.24.2-alpine AS builder
+FROM golang:1.24.3-alpine AS builder
 WORKDIR /app
 
 COPY . .
@@ -13,4 +13,6 @@ WORKDIR /app
 COPY --from=builder /app/sea-flea .
 # 🚧 Work in progress
 COPY plugins/*.wasm ./plugins/
+#ENV WASM_MESSAGE="Hello from the host!"
+#ENV WASM_VERSION="9.9.9"
 ENTRYPOINT ["./sea-flea"]
