@@ -22,7 +22,8 @@
 				"PKief.material-icon-theme",
 				"PKief.material-product-icons",
 				"wayou.vscode-todo-highlight",
-				"docker.docker"
+				"docker.docker",
+				"rust-lang.rust-analyzer"
 			]
 		}
 	},

@@ -49,9 +49,9 @@ func registerPromptsOfThePlugin(server *mcp.MCPServer, pluginInst *extism.Plugin
 			}
 
 			// Cast output to string
-			result := string(output)
+			//result := string(output)
+			//TODO : log result 
 
-			fmt.Printf("🟩🟩🟩Result from plugin: %s\n", result)
 
 			// Unmarshal the result to []map[string]any
 			var resultList []map[string]any
