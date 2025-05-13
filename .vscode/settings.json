@@ -45,7 +45,7 @@
     "[go]": {
         "editor.fontSize": 14,
     },
-    //"rust-analyzer.linkedProjects": [
-    //    "plugins/calc/Cargo.toml"
-    //],
+    "rust-analyzer.linkedProjects": [
+        "plugins/calc/Cargo.toml"
+    ],
 }
