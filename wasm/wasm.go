@@ -14,13 +14,31 @@ import (
 // TODO : check if we need a mutex for the plugins
 // TODO : check errors handling and logs
 
+func GetEnvVariableStartingWith(prefix string) map[string]string {
+	envVars := map[string]string{}
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, prefix) {
+			parts := strings.SplitN(env, "=", 2)
+			if len(parts) == 2 {
+				envVars[parts[0]] = parts[1]
+			}
+		}
+	}
+	return envVars
+}
+
+
+
 func LoadPlugins(server *mcp.MCPServer) {
+
+	//fmt.Println("🔥", GetEnvVariableStartingWith("WASM_"))
+
 	ctx := context.Background()
 
 	// Load plugins from the specified path
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig: wazero.NewModuleConfig().WithSysWalltime(),
-		EnableWasi:   true,
+		EnableWasi:   true, 
 	}
 
 	// List all  wasm files in the cfg.PluginsPath path
@@ -41,7 +59,7 @@ func LoadPlugins(server *mcp.MCPServer) {
 					},
 				},
 				AllowedHosts: []string{"*"},
-				Config:       map[string]string{},
+				Config:       GetEnvVariableStartingWith("WASM_"),
 			}
 
 			pluginInst, err := extism.NewPlugin(ctx, manifest, pluginConfig, nil) // new
@@ -60,7 +78,7 @@ func LoadPlugins(server *mcp.MCPServer) {
 				// TODO : return error
 				registerResourcesOfThePlugin(server, pluginInst)
 			}
-			
+
 			if pluginInst.FunctionExists("prompts_information") {
 				// TODO : return error
 				registerPromptsOfThePlugin(server, pluginInst)

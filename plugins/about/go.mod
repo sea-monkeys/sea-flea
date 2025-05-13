@@ -1,4 +1,4 @@
-module goodbye
+module about
 
 go 1.24.0
 

@@ -6,49 +6,6 @@ import (
 	"github.com/extism/go-pdk"
 )
 
-type Tool struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	InputSchema map[string]any `json:"inputSchema"`
-}
-
-//export tools_information
-func tools_information() {
-	goodbyeTool := Tool{
-		Name:        "goodbye",
-		Description: "Say goodbye to someone",
-		InputSchema: map[string]any{
-			"type":     "object",
-			"required": []string{"name"},
-			"properties": map[string]any{
-				"name": map[string]any{
-					"type":        "string",
-					"description": "Name of the person to say goodbye to",
-				},
-			},
-		},
-	}
-
-	byeTool := Tool{
-		Name:        "bye",
-		Description: "Say bye to someone",
-		InputSchema: map[string]any{
-			"type":     "object",
-			"required": []string{"name"},
-			"properties": map[string]any{
-				"name": map[string]any{
-					"type":        "string",
-					"description": "Name of the person to say bye to",
-				},
-			},
-		},
-	}
-
-	tools := []Tool{goodbyeTool, byeTool}
-
-	jsonData, _ := json.Marshal(tools)
-	pdk.OutputString(string(jsonData))
-}
 
 type Resource struct {
 	URI         string `json:"uri"`

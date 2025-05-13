@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/extism/go-pdk"
 )
@@ -79,6 +80,22 @@ func OrcGreetings() {
 	pdk.OutputString("Throm-ka " + args.Name)
 }
 
+func rollTheDices(numDices, numFaces int) []int {
+	// Seed the random number generator with current time
+	rand.Seed(time.Now().UnixNano())
+
+	// Create a slice to store the results
+	results := make([]int, numDices)
+
+	// Roll each die
+	for i := 0; i < numDices; i++ {
+		// Generate a random number between 1 and numFaces
+		results[i] = rand.Intn(numFaces) + 1
+	}
+
+	return results
+}
+
 //go:export roll_dices
 func RollDices() int32 {
 	type Arguments struct {
@@ -93,16 +110,12 @@ func RollDices() int32 {
 	numFaces := args.NumFaces
 	numDices := args.NumDices
 
-	// Sum of the dice roll results
+	results := rollTheDices(numDices, numFaces)
+	// Calculate the sum of all dice
 	sum := 0
-
-	// Roll each die and add the result to the sum
-	for range numDices {
-		// Generate a random number between 1 and numFaces
-		dieValue := rand.Intn(numFaces) + 1
-		sum += dieValue
+	for _, result := range results {
+		sum += result
 	}
-	// TODO: check the randomness of the result
 
 	pdk.OutputString(strconv.Itoa(sum))
 	return 0
@@ -231,7 +244,7 @@ func RequestInformationPrompt() {
 func RollDicesPrompt() {
 	type Arguments struct {
 		NumFaces string `json:"numFaces"`
-		NumDices  string `json:"numDices"`
+		NumDices string `json:"numDices"`
 	}
 
 	arguments := pdk.InputString()
