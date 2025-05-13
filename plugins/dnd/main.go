@@ -109,9 +109,7 @@ func RollDices() int32 {
 }
 
 // -------------------------------------------------
-//
 //	Resources
-//
 // -------------------------------------------------
 type Resource struct {
 	URI         string `json:"uri"`
@@ -152,9 +150,7 @@ func ResourcesInformation() {
 }
 
 // -------------------------------------------------
-//
 //	Prompts
-//
 // -------------------------------------------------
 type Prompt struct {
 	Name        string           `json:"name"`
