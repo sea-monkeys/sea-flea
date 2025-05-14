@@ -33,7 +33,7 @@ func ToolsInformation() {
 		Description: "a tool to roll dices",
 		InputSchema: InputSchema{
 			Type:     "object",
-			Required: []string{"name"},
+			Required: []string{"numFaces", "numDices"},
 			Properties: map[string]any{
 				"numFaces": map[string]any{
 					"type":        "number",

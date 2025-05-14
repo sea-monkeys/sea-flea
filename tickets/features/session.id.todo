@@ -1,0 +1,2 @@
+a way to simply create a session ID and forward it to the wasm plugin
+cf /wasm/wasm.go -> add key and value to manifest.Config

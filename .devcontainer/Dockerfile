@@ -84,8 +84,6 @@ rm extism-v${EXTISM_VERSION}-linux-${TARGETARCH}.tar.gz
 #extism --version
 EOF
 
-
-
 # ------------------------------------
 # Install NodeJS
 # ------------------------------------
@@ -115,6 +113,22 @@ echo \
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 EOF
+
+# ------------------------------------
+# Install dependencies for Rust 
+# and wasm
+# ------------------------------------
+RUN <<EOF
+# Additional dependencies for Rust
+apt-get update
+apt-get install -y pkg-config libssl-dev clang lld cmake
+
+# Clean up
+apt-get clean autoclean
+apt-get autoremove --yes
+rm -rf /var/lib/{apt,dpkg,cache,log}/
+EOF
+
 
 # ------------------------------------
 # Create a new user
@@ -158,3 +172,26 @@ RUN touch ~/.sudo_as_admin_successful
 RUN <<EOF
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
 EOF
+
+
+# ------------------------------------
+# Install Rust
+# ------------------------------------
+RUN <<EOF
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${RUST_VERSION}
+. $HOME/.cargo/env
+
+# Install WebAssembly target
+rustup target add wasm32-wasi
+rustup target add wasm32-unknown-unknown
+rustup target add wasm32-wasip1
+
+# Install helpful Rust tools
+cargo install wasm-pack --force
+cargo install wasm-tools
+cargo install wasm-bindgen-cli
+cargo install cargo-generate
+EOF
+
+# Add cargo bin to PATH
+ENV PATH="/home/${USER_NAME}/.cargo/bin:${PATH}"
