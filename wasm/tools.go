@@ -6,6 +6,7 @@ import (
 	"os"
 	"sea-flea/mcp"
 	"sea-flea/tools"
+	"sea-flea/utils"
 
 	extism "github.com/extism/go-sdk"
 )
@@ -42,6 +43,15 @@ func registerToolsOfThePlugin(server *mcp.MCPServer, pluginInst *extism.Plugin) 
 				fmt.Fprintf(os.Stderr, "Error marshalling args: %v\n", err)
 				return nil, err
 			}
+
+			//! check if I generate a session Id here
+			//? using pluginInst.Config
+			//? Where does the session ID come from? What event generates it?
+			// TODO check how the session is handled by the streamable-http transport
+			utils.Log(func() string {
+				return "✋✋✋ calling tool " + tool.Name + " with args: " + string(argsJSON)
+			}, server.LogOutput())
+			//! to be remove
 
 			_, output, err := pluginInst.Call(tool.Name, argsJSON)
 			if err != nil {
