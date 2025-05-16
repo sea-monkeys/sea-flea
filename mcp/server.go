@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"encoding/json"
 	"sea-flea/cli"
 	"sea-flea/prompts"
 	"sea-flea/resources"
@@ -47,6 +48,8 @@ type MCPServer struct {
 	logOutput bool
 
 	pluginsPath string
+
+	pluginsSettings string
 }
 
 func NewMCPServer(cfg *cli.Config) *MCPServer {
@@ -55,8 +58,9 @@ func NewMCPServer(cfg *cli.Config) *MCPServer {
 		resourceSet: make(map[string]resources.Resource),
 		promptSet:   make(map[string]prompts.Prompt),
 
-		logOutput:   cfg.Debug,
-		pluginsPath: cfg.PluginsPath,
+		logOutput:       cfg.Debug,
+		pluginsPath:     cfg.PluginsPath,
+		pluginsSettings: cfg.Settings,
 	}
 }
 
@@ -66,6 +70,19 @@ func (s *MCPServer) LogOutput() bool {
 
 func (s *MCPServer) PluginsPath() string {
 	return s.pluginsPath
+}
+
+func (s *MCPServer) PluginsSettings() (map[string]string, error) {
+	if s.pluginsSettings == "" {
+		return nil, nil
+	}
+	// convert the json string to a map
+	var settings map[string]string
+	err := json.Unmarshal([]byte(s.pluginsSettings), &settings)
+	if err != nil {
+		return nil, err
+	}
+	return settings, nil
 }
 
 func (s *MCPServer) AddTool(tool tools.Tool) {

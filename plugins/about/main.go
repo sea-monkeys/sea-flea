@@ -28,13 +28,23 @@ func ResourcesInformation() {
 		version = "..."
 	}
 
+	project, okp := pdk.GetConfig("project")
+	if !okp {
+		project = "..."
+	}
+	id, okid := pdk.GetConfig("id")
+	if !okid {
+		id = "..."
+	}
+
+
 	resources := []Resource{
 		{
 			URI:         "about:///sea-flea",
 			Name:        "Resource sample",
 			Description: "This is a resource example",
 			MimeType:    "application/json",
-			Text:        `{"message": "` + message + `", "version": "` + version + `"}`,
+			Text:        `{"message": "` + message + `", "version": "` + version + `", "project": "` + project + `", "id": "` + id + `"}`,
 		},
 	}
 	jsonData, _ := json.Marshal(resources)

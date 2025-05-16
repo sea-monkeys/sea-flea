@@ -18,6 +18,8 @@ type Config struct {
 	// cert and key for TLS
 	CertFile string
 	KeyFile  string
+	// Settings for the plugins
+	Settings string
 }
 
 /*
@@ -50,6 +52,9 @@ func ParseFlags() (*Config, error) {
 	// TLS flags
 	flag.StringVar(&cfg.CertFile, "cert", "", "Path to TLS certificate file")
 	flag.StringVar(&cfg.KeyFile, "key", "", "Path to TLS key file")
+
+	// Settings for the plugins
+	flag.StringVar(&cfg.Settings, "settings", "", "Settings for the plugins (JSON format)")
 
 
 	// Parse flags

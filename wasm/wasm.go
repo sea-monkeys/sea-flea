@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"os"
 	"sea-flea/mcp"
+	"sea-flea/utils"
 	"strings"
+
+	"maps"
 
 	extism "github.com/extism/go-sdk"
 	"github.com/tetratelabs/wazero"
@@ -27,8 +30,6 @@ func GetEnvVariableStartingWith(prefix string) map[string]string {
 	return envVars
 }
 
-
-
 func LoadPlugins(server *mcp.MCPServer) {
 
 	//fmt.Println("🔥", GetEnvVariableStartingWith("WASM_"))
@@ -38,7 +39,7 @@ func LoadPlugins(server *mcp.MCPServer) {
 	// Load plugins from the specified path
 	pluginConfig := extism.PluginConfig{
 		ModuleConfig: wazero.NewModuleConfig().WithSysWalltime(),
-		EnableWasi:   true, 
+		EnableWasi:   true,
 	}
 
 	// List all  wasm files in the cfg.PluginsPath path
@@ -46,6 +47,26 @@ func LoadPlugins(server *mcp.MCPServer) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading plugins directory: %v\n", err)
 		os.Exit(1)
+	}
+
+	config := map[string]string{}
+
+	// add the content of the env vars to the config variable
+	wasmEnvVars := GetEnvVariableStartingWith("WASM_")
+	if len(wasmEnvVars) > 0 {
+		maps.Copy(config, wasmEnvVars)
+	}
+
+	// add the content of the settings to the config variable
+	settings, err := server.PluginsSettings()
+	if err != nil {
+		// Log the output
+		utils.Log(func() string {
+			return "😡 when reading the plugins settings:" + err.Error()
+		}, server.LogOutput())
+	}
+	if settings != nil {
+		maps.Copy(config, settings)
 	}
 
 	for _, file := range wasmFiles {
@@ -59,7 +80,8 @@ func LoadPlugins(server *mcp.MCPServer) {
 					},
 				},
 				AllowedHosts: []string{"*"},
-				Config:       GetEnvVariableStartingWith("WASM_"),
+				Config:       config,
+				//Config:       GetEnvVariableStartingWith("WASM_"),
 			}
 
 			pluginInst, err := extism.NewPlugin(ctx, manifest, pluginConfig, nil) // new
