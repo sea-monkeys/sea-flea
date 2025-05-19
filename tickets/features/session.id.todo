@@ -1,6 +1,9 @@
+//*-------------------
+//* 000-SESSION-ID
+//*-------------------
 Look at comments in /wasm/tools.go (registerToolsOfThePlugin)
 ---
-Or do something more stateless with someting into the headers
+Or do something more stateless with sometging into the headers
 ---
-a way to simply create a session ID and forward it to the wasm plugin
-cf /wasm/wasm.go -> add key and value to manifest.Config
+Or add a parameter to the tool to handle the "id"
+---

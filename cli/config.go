@@ -7,19 +7,26 @@ import (
 
 // Config holds all command line arguments
 type Config struct {
-	Transport   string
-	HTTPPort    int
-	Debug       bool
-	PluginsPath string
-	Filter      string
-	DemoTools bool
+	Transport     string
+	HTTPPort      int
+	Debug         bool
+	PluginsPath   string
+	Filter        string
+	DemoTools     bool
 	DemoResources bool
-	DemoPrompts bool
+	DemoPrompts   bool
 	// cert and key for TLS
 	CertFile string
 	KeyFile  string
 	// Settings for the plugins
 	Settings string
+
+	//*-------------------
+	//* 002-SK-PLUGINS
+	//*-------------------
+	Generate bool
+	Language string
+	Name     string
 }
 
 /*
@@ -29,10 +36,7 @@ mkcert \
 -key-file mcp.amphipod.local.key \
 amphipod.local "*.amphipod.local" localhost 127.0.0.1 ::1
 ```
-
 */
-
-
 
 // ParseFlags parses command line arguments and returns a Config
 func ParseFlags() (*Config, error) {
@@ -56,6 +60,12 @@ func ParseFlags() (*Config, error) {
 	// Settings for the plugins
 	flag.StringVar(&cfg.Settings, "settings", "", "Settings for the plugins (JSON format)")
 
+	//*-------------------
+	//* 002-SK-PLUGINS
+	//*-------------------
+	flag.BoolVar(&cfg.Generate, "generate", false, "Generate a new plugin")
+	flag.StringVar(&cfg.Language, "language", "", "Language for the plugin (e.g., go, rust)")
+	flag.StringVar(&cfg.Name, "name", "", "Name of the plugin to generate")
 
 	// Parse flags
 	flag.Parse()

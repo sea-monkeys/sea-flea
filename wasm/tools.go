@@ -44,6 +44,9 @@ func registerToolsOfThePlugin(server *mcp.MCPServer, pluginInst *extism.Plugin) 
 				return nil, err
 			}
 
+			//*-------------------
+			//* 000-SESSION-ID
+			//*-------------------
 			//! check if I generate a session Id here
 			//? using pluginInst.Config
 			//? Where does the session ID come from? What event generates it?
@@ -51,7 +54,7 @@ func registerToolsOfThePlugin(server *mcp.MCPServer, pluginInst *extism.Plugin) 
 			utils.Log(func() string {
 				return "✋✋✋ calling tool " + tool.Name + " with args: " + string(argsJSON)
 			}, server.LogOutput())
-			//! to be remove
+			//! to be removed
 
 			_, output, err := pluginInst.Call(tool.Name, argsJSON)
 			if err != nil {

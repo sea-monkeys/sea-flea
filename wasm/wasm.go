@@ -42,6 +42,22 @@ func LoadPlugins(server *mcp.MCPServer) {
 		EnableWasi:   true,
 	}
 
+	// *-------------------
+	// * 001-FILTER
+	// *-------------------
+	//! use it to filter the plugins: wasmFiles
+	utils.Log(func() string {
+		if len(server.FilterItems()) == 0 {
+			return "🧩 no filter applied"
+		}
+		items := "🧩"
+		for _, item := range server.FilterItems() {
+			items += " " + item + "/"
+		}
+		return items
+	}, server.LogOutput())
+	//! to be removed
+
 	// List all  wasm files in the cfg.PluginsPath path
 	wasmFiles, err := os.ReadDir(server.PluginsPath())
 	if err != nil {

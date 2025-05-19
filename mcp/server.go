@@ -6,6 +6,7 @@ import (
 	"sea-flea/prompts"
 	"sea-flea/resources"
 	"sea-flea/tools"
+	"strings"
 )
 
 // MCP specific types
@@ -50,9 +51,12 @@ type MCPServer struct {
 	pluginsPath string
 
 	pluginsSettings string
+
+	filter string
 }
 
 func NewMCPServer(cfg *cli.Config) *MCPServer {
+	// Create a new MCPServer instance
 	return &MCPServer{
 		toolSet:     make(map[string]tools.Tool),
 		resourceSet: make(map[string]resources.Resource),
@@ -61,6 +65,8 @@ func NewMCPServer(cfg *cli.Config) *MCPServer {
 		logOutput:       cfg.Debug,
 		pluginsPath:     cfg.PluginsPath,
 		pluginsSettings: cfg.Settings,
+
+		filter: cfg.Filter,
 	}
 }
 
@@ -109,4 +115,13 @@ func (s *MCPServer) AddPrompt(prompt prompts.Prompt) {
 func (s *MCPServer) GetPrompt(name string) (prompts.Prompt, bool) {
 	prompt, ok := s.promptSet[name]
 	return prompt, ok
+}
+
+// *-------------------
+// * 001-FILTER
+// *-------------------
+func (s *MCPServer) FilterItems() []string {
+	// Handle filterItem
+	filterItem := strings.Split(s.filter, ",")
+	return filterItem
 }

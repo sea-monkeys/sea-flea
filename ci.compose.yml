@@ -1,6 +1,9 @@
-# docker compose --file ci.compose.yml up --build
 x-comment: |
-  This compose file is a ci pipeline
+  This compose file is a local ci pipeline
+  Run it with:
+  ```
+  docker compose --file ci.compose.yml up --build
+  ```
 
 services:
 
@@ -14,100 +17,54 @@ services:
         COPY . .
     volumes:
       - go-binaries:/binaries
-    #working_dir: /app
     command:
       - /bin/sh
       - -c
       - |
+        echo "🔵 Building MCP Runner ⏳"
         go mod tidy
         go build
         mkdir -p /binaries
         mv sea-flea /binaries/
-        echo "🟢 Go binary copied to volume successfully"
-
-  tools-list:
-    image: golang:1.24.2-alpine
+        if [ $? -eq 0 ]; then
+          echo "🟢 Go binary built and copied to volume successfully"
+        else
+          echo "🔴 Go build failed"
+        fi
+        
+  # Build the WASM plugin and copy the wasm file to a volume
+  build-about-wasm-plugin:
+    build:
+      context: ./plugins/about
+      dockerfile_inline: |
+        FROM tinygo/tinygo:0.37.0
+        USER root
+        WORKDIR /app
+        COPY . .
     volumes:
       - go-binaries:/binaries
     command:
       - /bin/sh
       - -c
       - |
-        apk add --no-cache jq
-        cd /binaries
-
-        cat > mcp_test_tools_list.jsonl << 'EOF'
-        {
-            "jsonrpc": "2.0", 
-            "id": 0, 
-            "method": "initialize", 
-            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
-        }
-        {
-            "jsonrpc": "2.0", 
-            "method": "notifications/initialized"
-        }
-        {
-            "jsonrpc": "2.0", 
-            "id": 2, 
-            "method": "tools/list", 
-            "params": {}
-        }
-        EOF
-        cat mcp_test_tools_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
+        echo "🟣 Building wasm plugin ⏳"
+        go mod tidy
+        tinygo build -scheduler=none --no-debug \
+          -o about.wasm \
+          -target wasi main.go
+          mkdir -p /binaries
+          mv about.wasm /binaries/
         if [ $? -eq 0 ]; then
-          echo "🟢 Test passed successfully"
+          echo "🟢 wasm plugin built and copied to volume successfully"
         else
-          echo "🔴 Test failed"
+          echo "🔴 wasm build failed"
         fi
-
     depends_on:
       generate-binary:
         condition: service_completed_successfully
 
-  tools-call:
-    image: golang:1.24.2-alpine
-    volumes:
-      - go-binaries:/binaries
-    command:
-      - /bin/sh
-      - -c
-      - |
-        apk add --no-cache jq
-        cd /binaries
-
-        cat > mcp_test_tools_call.jsonl << 'EOF'
-        {
-            "jsonrpc": "2.0", 
-            "id": 0, 
-            "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
-        }
-        {
-            "jsonrpc": "2.0", 
-            "method": "notifications/initialized"
-        }
-        {
-            "jsonrpc": "2.0", 
-            "id": 2, 
-            "method": "tools/call", "params": {
-                "name": "hello", 
-                "arguments": {"firstName": "Bob", "lastName": "Morane"}
-            }
-        }
-        EOF
-        cat mcp_test_tools_call.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
-        if [ $? -eq 0 ]; then
-          echo "🟢 Test passed successfully"
-        else
-          echo "🔴 Test failed"
-        fi
-
-    depends_on:
-      generate-binary:
-        condition: service_completed_successfully
-
-
-  resources-list:
+  # Call the resources/list method on the about plugin
+  test-about-resources-list:
     image: golang:1.24.2-alpine
     volumes:
       - go-binaries:/binaries
@@ -136,7 +93,7 @@ services:
             "params": {}
         }
         EOF
-        cat mcp_test_resources_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
+        cat mcp_test_resources_list.jsonl | ./sea-flea --transport stdio --debug --plugins ./ | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -144,14 +101,17 @@ services:
         fi
 
     depends_on:
-      generate-binary:
+      build-about-wasm-plugin:
         condition: service_completed_successfully
 
-
-  resources-read:
+  # Call the resources/read method on the about plugin
+  test-about-resources-read:
     image: golang:1.24.2-alpine
     volumes:
       - go-binaries:/binaries
+    environment:
+      - WASM_MESSAGE="Sea Flea"
+      - WASM_VERSION="0.0.0"
     command:
       - /bin/sh
       - -c
@@ -175,11 +135,12 @@ services:
             "id": 2, 
             "method": "resources/read", 
             "params": {
-                "uri": "message:///information"
+                "uri": "about:///sea-flea"
             }
         }
         EOF
-        cat mcp_test_resources_read.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
+
+        cat mcp_test_resources_read.jsonl | ./sea-flea --transport stdio --debug --plugins ./ --settings '{"project":"sea-flea", "id":"1212"}' | jq -c '.' | jq -s '.'
         if [ $? -eq 0 ]; then
           echo "🟢 Test passed successfully"
         else
@@ -187,93 +148,7 @@ services:
         fi
 
     depends_on:
-      generate-binary:
-        condition: service_completed_successfully
-
-  prompts-list:
-    image: golang:1.24.2-alpine
-    volumes:
-      - go-binaries:/binaries
-    command:
-      - /bin/sh
-      - -c
-      - |
-        apk add --no-cache jq
-        cd /binaries
-
-        cat > mcp_test_prompts_list.jsonl << 'EOF'
-        {
-            "jsonrpc": "2.0", 
-            "id": 0, 
-            "method": "initialize", 
-            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
-        }
-        {
-            "jsonrpc": "2.0", 
-            "method": "notifications/initialized"
-        }
-        {
-            "jsonrpc": "2.0", 
-            "id": 2, 
-            "method": "prompts/list", 
-            "params": {}
-        }
-        EOF
-        cat mcp_test_prompts_list.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
-        if [ $? -eq 0 ]; then
-          echo "🟢 Test passed successfully"
-        else
-          echo "🔴 Test failed"
-        fi
-
-    depends_on:
-      generate-binary:
-        condition: service_completed_successfully
-
-
-  prompts-get:
-    image: golang:1.24.2-alpine
-    volumes:
-      - go-binaries:/binaries
-    command:
-      - /bin/sh
-      - -c
-      - |
-        apk add --no-cache jq
-        cd /binaries
-
-        cat > mcp_test_prompts_get.jsonl << 'EOF'
-        {
-            "jsonrpc": "2.0", 
-            "id": 0, 
-            "method": "initialize", 
-            "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
-        }
-        {
-            "jsonrpc": "2.0", 
-            "method": "notifications/initialized"
-        }
-        {
-            "jsonrpc": "2.0", 
-            "id": 2, 
-            "method": "prompts/get", 
-            "params": {
-                "name": "basic_prompt",
-                "arguments": {
-                    "message": "Hello, World!"
-                }
-            }
-        }
-        EOF
-        cat mcp_test_prompts_get.jsonl | ./sea-flea --transport stdio --debug --demo-tools --demo-resources --demo-prompts | jq -c '.' | jq -s '.'
-        if [ $? -eq 0 ]; then
-          echo "🟢 Test passed successfully"
-        else
-          echo "🔴 Test failed"
-        fi
-
-    depends_on:
-      generate-binary:
+      build-about-wasm-plugin:
         condition: service_completed_successfully
 
 
@@ -283,19 +158,14 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      tools-list:
+      test-about-resources-list:
         condition: service_completed_successfully
-      tools-call:
-        condition: service_completed_successfully
-      resources-list:
-        condition: service_completed_successfully
-      resources-read:
-        condition: service_completed_successfully
-      prompts-list:
-        condition: service_completed_successfully
-      prompts-get:
+      test-about-resources-read:
         condition: service_completed_successfully
         
+# TODO add MCP requests tests with the image
+# TODO add image publication to Docker Hub
+
 volumes:
   go-binaries:
     name: go-binaries

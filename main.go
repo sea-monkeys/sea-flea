@@ -7,8 +7,8 @@ import (
 	"sea-flea/demo"
 	"sea-flea/mcp"
 	"sea-flea/transport"
+	"sea-flea/utils"
 	"sea-flea/wasm"
-	"strings"
 )
 
 func main() {
@@ -19,25 +19,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Handle filters
-	filters := strings.SplitSeq(cfg.Filter, ",")
-	for filter := range filters {
-		filter = strings.TrimSpace(filter)
-		//fmt.Printf("Processing filter: %s\n", filter)
-		// Add your filter processing logic here
+	//*-------------------
+	//* 002-SK-PLUGINS
+	//*-------------------
+	if cfg.Generate {
+		// Generate a new source code plugin
+		utils.Log(func() string {
+			return "💀 " + cfg.Name +" / " + cfg.Language
+		}, cfg.Debug)
+		//! to be removed
+		os.Exit(0)
 	}
-
-	/*
-		fmt.Printf("Configuration:\n")
-		fmt.Printf("  Transport: %s\n", cfg.Transport)
-		fmt.Printf("  HTTP Port: %d\n", cfg.HTTPPort)
-		fmt.Printf("  Debug: %t\n", cfg.Debug)
-		fmt.Printf("  Plugins Path: %s\n", cfg.PluginsPath)
-		fmt.Printf("  Filter: %s\n", cfg.Filter)
-		fmt.Printf("  Load Demo Tools: %t\n", cfg.DemoTools)
-		fmt.Printf("  Load Demo Resources: %t\n", cfg.DemoResources)
-		fmt.Printf("  Load Demo Prompts: %t\n", cfg.DemoPrompts)
-	*/
 
 	// Create server instance
 	server := mcp.NewMCPServer(cfg)
