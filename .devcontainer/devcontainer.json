@@ -32,7 +32,7 @@
 		//"OLLAMA_HOST": "http://host.docker.internal:11434"
 		//"OLLAMA_HOST": "http://ollama-service:11434"
     },
-	"forwardPorts": [3000, 4000, 8080, 9090, 7070, 6443],
+	"forwardPorts": [5050, 3000, 4000, 8080, 9090, 7070, 6443],
    	"mounts": [
         "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",

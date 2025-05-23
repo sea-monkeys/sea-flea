@@ -3,11 +3,6 @@
 # Resources list
 COMMENT
 
-HTTP_PORT=5050
-MCP_SERVER=http://0.0.0.0:${HTTP_PORT}
-AUTHENTICATION_TOKEN=mcp-is-the-way
-
-# host.docker.internal
 
 read -r -d '' DATA <<- EOM
 {

@@ -1,19 +1,14 @@
 #!/bin/bash
 : <<'COMMENT'
-# Resources list
+# Tools list
 COMMENT
 
-HTTP_PORT=5050
-MCP_SERVER=http://0.0.0.0:${HTTP_PORT}
-AUTHENTICATION_TOKEN=mcp-is-the-way
-
-# host.docker.internal
 
 read -r -d '' DATA <<- EOM
 {
   "jsonrpc": "2.0",
   "id": "1",
-  "method": "resources/list",
+  "method": "tools/list",
   "params": {}
 }
 EOM
@@ -23,5 +18,6 @@ curl ${MCP_SERVER}/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d "${DATA}" | jq
-
+  #\
+  #| grep "^data:" | sed 's/^data: //' | jq '.'
 

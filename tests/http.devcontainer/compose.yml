@@ -1,0 +1,110 @@
+
+
+
+services:
+
+  # docker compose up mcp-server --build --no-log-prefix
+  mcp-server:
+    image: k33g/sea-flea:demo-wasm-files
+    #container_name: mcp-server
+    ports:
+      - "5050:5050"
+    environment:
+      - MCP_TOKEN=mcp-is-the-way
+    command: [
+      "--debug",
+      "--transport", "streamable-http",
+      "--plugins", "./plugins"
+    ]
+    #networks:
+    #  - mcp-network
+
+  # docker compose up initialize --build --no-log-prefix
+  initialize:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM debian:latest
+        RUN apt-get update && apt-get install -y curl jq
+        WORKDIR /scripts
+        COPY . .
+        # Make scripts executable
+        RUN chmod +x *.sh
+    #networks:
+    #  - mcp-network
+    environment:
+      - MCP_SERVER=http://mcp-server:5050
+      - AUTHENTICATION_TOKEN=mcp-is-the-way
+    command: |
+      sh -c '
+      ./initialize.sh
+      '
+
+  # docker compose up resources-list --build --no-log-prefix
+  resources-list:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM debian:latest
+        RUN apt-get update && apt-get install -y curl jq
+        WORKDIR /scripts
+        COPY . .
+        # Make scripts executable
+        RUN chmod +x *.sh
+    #networks:
+    #  - mcp-network
+    environment:
+      - MCP_SERVER=http://mcp-server:5050
+      - AUTHENTICATION_TOKEN=mcp-is-the-way
+    command: |
+      sh -c '
+      ./resources.list.sh
+      '
+
+  # docker compose up tools-list --build --no-log-prefix
+  tools-list:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM debian:latest
+        RUN apt-get update && apt-get install -y curl jq
+        WORKDIR /scripts
+        COPY . .
+        # Make scripts executable
+        RUN chmod +x *.sh
+    #networks:
+    #  - mcp-network
+    environment:
+      - MCP_SERVER=http://mcp-server:5050
+      - AUTHENTICATION_TOKEN=mcp-is-the-way
+    command: |
+      sh -c '
+      ./tools.list.sh
+      '
+
+  # docker compose up use-tool-add --build --no-log-prefix
+  use-tool-add:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM debian:latest
+        RUN apt-get update && apt-get install -y curl jq
+        WORKDIR /scripts
+        COPY . .
+        # Make scripts executable
+        RUN chmod +x *.sh
+    #networks:
+    #  - mcp-network
+    environment:
+      - MCP_SERVER=http://mcp-server:5050
+      - AUTHENTICATION_TOKEN=mcp-is-the-way
+    command: |
+      sh -c '
+      ./use.tool.add.sh
+      '
+
+#networks:
+#  mcp-network:
+#    driver: bridge
+
+# docker compose --file wasm.compose.yml up

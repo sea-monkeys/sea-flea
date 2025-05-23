@@ -4,7 +4,7 @@ variable "REPO" {
 
 variable "TAG" {
   #default = "0.0.0"
-  default = "demo"
+  default = "demo-wasm-files"
 }
 
 group "default" {
@@ -13,7 +13,7 @@ group "default" {
 
 target "sea-flea" {
   context = "."
-  dockerfile = "release.Dockerfile"
+  dockerfile = "wasm.release.Dockerfile"
   args = {}
   platforms = [
     "linux/amd64",
@@ -22,5 +22,4 @@ target "sea-flea" {
   tags = ["${REPO}/sea-flea:${TAG}"]
 }
 
-# docker buildx bake --push --file docker-bake.hcl
-# docker buildx bake --push
+# docker buildx bake --push --file wasm.release.docker-bake.hcl

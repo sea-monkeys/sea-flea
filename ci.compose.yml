@@ -153,10 +153,10 @@ services:
 
 
   build-mcp-server-image:
-    image: mcp-sea-flea:demo
+    image: sea-flea:ci-cemo
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: compose.Dockerfile
     depends_on:
       test-about-resources-list:
         condition: service_completed_successfully

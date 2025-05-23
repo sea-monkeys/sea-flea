@@ -34,12 +34,25 @@ func StreamableHTTP(server *mcp.MCPServer, cert, key string) {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /health", func(response http.ResponseWriter, request *http.Request) {
+		response.WriteHeader(http.StatusOK)
+		response.Write([]byte(`{"status": "ok"}`))
+	})
+
 	mux.HandleFunc("POST /mcp", func(response http.ResponseWriter, request *http.Request) {
 
 		response.Header().Set("Access-Control-Allow-Origin", "*")
 		response.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		response.Header().Set("Content-Type", "application/json")
+
+		/*
+		response.Header().Set("Access-Control-Allow-Origin", "*")
+		response.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET")
+		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		response.Header().Set("Access-Control-Allow-Credentials", "true")
+		response.Header().Set("Content-Type", "application/json")
+		*/
 
 		if request.Method == http.MethodOptions {
 			response.WriteHeader(http.StatusOK)
