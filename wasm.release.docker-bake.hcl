@@ -3,7 +3,6 @@ variable "REPO" {
 }
 
 variable "TAG" {
-  #default = "0.0.0"
   default = "demo-wasm-files"
 }
 

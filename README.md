@@ -2,6 +2,8 @@
 
 **Sea Flea** is a MCP Server "WASM Runner"
 
+Release `0.0.0`, 🐳 Docker image: `k33g/sea-flea:0.0.0`
+
 ## Overview
 
 Sea Flea is an MCP (Model Context Protocol) server that supports WebAssembly (WASM) plugins. Plugins can provide three types of capabilities:
@@ -189,7 +191,7 @@ docker buildx bake --push --file release.docker-bake.hcl
 ### Create an **sea-flea** image with you WASM plugins
 > `wasm.release.Dockerfile`
 ```Dockerfile
-FROM  k33g/sea-flea:demo
+FROM  k33g/sea-flea:0.0.0
 WORKDIR /app
 
 # Change this part
