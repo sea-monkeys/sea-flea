@@ -3,5 +3,5 @@
 **Build**:
 ```bash
 cargo build --release 
-cp target/wasm32-unknown-unknown/release/calc.wasm ../
+cp target/wasm32-unknown-unknown/release/readme.wasm ../
 ```
