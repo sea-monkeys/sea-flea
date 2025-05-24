@@ -9,7 +9,7 @@ Release `0.0.0`, 🐳 Docker image: `k33g/sea-flea:0.0.0`
 Sea Flea is an MCP (Model Context Protocol) server that supports WebAssembly (WASM) plugins. Plugins can provide three types of capabilities:
 
 - **Tools**: Functions that can be called with arguments
-- **Resources**: Static or dynamic content accessible via URIs  
+- **Resources**: Static content accessible via URIs  (dynamic content is not yet implemented)
 - **Prompts**: Templates for generating conversation prompts
 
 And **Sea Flea** will load the plugin(s) and provide the JSON RPC endpoints.

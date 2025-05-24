@@ -1,23 +1,12 @@
 #!/bin/bash
 
-extism call ../goodbye.wasm tools_information \
+extism call ../about.wasm resources_information \
   --log-level "info" \
   --wasi
 echo ""
 
-extism call ../goodbye.wasm goodbye \
-  --input '{"name":"Bob Morane"}' \
+extism call ../about.wasm resource_sample \
   --log-level "info" \
   --wasi
 echo ""
 
-extism call ../goodbye.wasm bye \
-  --input '{"name":"Bob Morane"}' \
-  --log-level "info" \
-  --wasi
-echo ""
-
-extism call ../goodbye.wasm resources_information \
-  --log-level "info" \
-  --wasi
-echo ""

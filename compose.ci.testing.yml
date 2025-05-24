@@ -1,8 +1,14 @@
 x-comment: |
-  This compose file is a local ci pipeline
+  This compose file is a local ci pipeline for testing the project
   Run it with:
   ```
   docker compose --file ci.compose.yml up --build
+  ```
+
+  The last job will build (not publish) the MCP server image with the wasm plugins for testing
+  To test STDIO transport with inspector and the image, use this command:
+  ```
+  docker run --rm -i sea-flea:ci-demo --debug --plugins ./plugins
   ```
 
 services:
@@ -151,21 +157,19 @@ services:
       build-about-wasm-plugin:
         condition: service_completed_successfully
 
-
+  # Test STDIO transport with inspector
+  # docker run --rm -i sea-flea:ci-demo --debug --plugins ./plugins
   build-mcp-server-image:
-    image: sea-flea:ci-cemo
+    image: sea-flea:ci-demo
     build:
       context: .
-      dockerfile: compose.Dockerfile
+      dockerfile: compose.ci.testing.Dockerfile
     depends_on:
       test-about-resources-list:
         condition: service_completed_successfully
       test-about-resources-read:
         condition: service_completed_successfully
         
-# TODO add MCP requests tests with the image
-# TODO add image publication to Docker Hub
-
 volumes:
   go-binaries:
     name: go-binaries

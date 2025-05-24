@@ -139,27 +139,58 @@ func ResourcesInformation() {
 	resources := []Resource{
 		{
 			URI:         "message:///about",
-			Name:        "about",
+			Name:        "dnd_about",
 			Description: "About object",
-			MimeType:    "application/json",
-			Text: `{
-				"version": "1.0.0",
-				"author": "@k33g",
-				"license": "MIT",
-				"text": "This is a simple about object"
-			}`,
+			//MimeType:    "application/json",
 		},
 		{
 			URI:         "message:///help",
-			Name:        "help",
+			Name:        "dnd_help",
 			Description: "Help resource",
-			MimeType:    "text/plain",
-			Text:        `=== Help ===`,
+			//MimeType:    "text/plain",
+			//Text:        `=== Help ===`,
 		},
 	}
 	jsonData, _ := json.Marshal(resources)
 	pdk.OutputString(string(jsonData))
 
+}
+
+//go:export dnd_about
+func DndAbout() {
+	// Define the about resource content
+	about := Resource{
+		URI:         "message:///about",
+		Name:        "dnd_about",
+		Description: "About object",
+		MimeType:    "application/json",
+		Text: `{
+			"version": "1.0.0",
+			"author": "@k33g",
+			"license": "MIT",
+			"text": "This is a simple about object"
+		}`,
+	}
+
+	jsonData, _ := json.Marshal(about)
+	pdk.OutputString(string(jsonData))
+}
+
+//go:export dnd_help
+func DndHelp() {
+	// Define the help resource content
+	help := Resource{
+		URI:         "message:///help",
+		Name:        "dnd_help",
+		Description: "Help resource",
+		MimeType:    "text/plain",
+		Text: `=== Help ===
+This is a simple help resource for the DnD plugin.
+It provides information about the available resources and tools.`,
+	}
+
+	jsonData, _ := json.Marshal(help)
+	pdk.OutputString(string(jsonData))
 }
 
 // -------------------------------------------------
