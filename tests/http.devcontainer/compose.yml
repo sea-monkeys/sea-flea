@@ -5,7 +5,7 @@ services:
 
   # docker compose up mcp-server --build --no-log-prefix
   mcp-server:
-    image: k33g/sea-flea:demo-wasm-files
+    image: sea-flea:demo
     #container_name: mcp-server
     ports:
       - "5050:5050"

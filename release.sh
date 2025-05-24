@@ -1,13 +1,14 @@
 #!/bin/bash
-set -o allexport; source release.env; set +o allexport
+set -o allexport; source compose.ci.releasing.env; set +o allexport
 
 : <<'COMMENT'
 Todo:
-- update of release.env:
-  - TAG
-  - ABOUT
+- 🛠️ update VERSION in compose.ci.releasing.env
+- 📝 update documents and README.md if necessary
+- 📦 run compose.ci.releasing.sh to generate the binaries and publish the Docker images
+- 🏷️ run the current script to create a git tag and push it to the repository
 
-Remark: delete tag: git tag -d v0.0.1
+Remark: delete a tag: git tag -d v0.0.1
 COMMENT
 
 echo "Generating release: ${TAG} ${ABOUT}"

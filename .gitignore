@@ -1,5 +1,7 @@
 modelcontextprotocol/
 backup/
 inspector/
+tmp/
 *.crt
 *.key
+credentials.env

@@ -2,7 +2,7 @@ x-comment: |
   This compose file is a local ci pipeline for testing the project
   Run it with:
   ```
-  docker compose --file ci.compose.yml up --build
+  docker compose --file compose.ci.testing.yml up --build
   ```
 
   The last job will build (not publish) the MCP server image with the wasm plugins for testing
@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM golang:1.24.2-alpine
+        FROM golang:1.24.3-alpine
         WORKDIR /app
         COPY . .
     volumes:
@@ -71,7 +71,7 @@ services:
 
   # Call the resources/list method on the about plugin
   test-about-resources-list:
-    image: golang:1.24.2-alpine
+    image: golang:1.24.3-alpine
     volumes:
       - go-binaries:/binaries
     command:
@@ -112,7 +112,7 @@ services:
 
   # Call the resources/read method on the about plugin
   test-about-resources-read:
-    image: golang:1.24.2-alpine
+    image: golang:1.24.3-alpine
     volumes:
       - go-binaries:/binaries
     environment:
@@ -158,9 +158,9 @@ services:
         condition: service_completed_successfully
 
   # Test STDIO transport with inspector
-  # docker run --rm -i sea-flea:ci-demo --debug --plugins ./plugins
+  # docker run --rm -i sea-flea:demo --debug --plugins ./plugins
   build-mcp-server-image:
-    image: sea-flea:ci-demo
+    image: sea-flea:demo
     build:
       context: .
       dockerfile: compose.ci.testing.Dockerfile

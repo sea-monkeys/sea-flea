@@ -27,7 +27,7 @@ echo "Running MCP server with proper initialization sequence..."
 echo "---------------------------------------------------------"
 
 # Pipe the input to the server and process output with jq
-cat /tmp/mcp_test_input.jsonl | docker run --rm -i k33g/sea-flea:demo-wasm-files --debug --plugins ./plugins | jq -c '.' | jq -s '.'
+cat /tmp/mcp_test_input.jsonl | docker run --rm -i sea-flea:demo --debug --plugins ./plugins | jq -c '.' | jq -s '.'
 
 # Clean up
 rm /tmp/mcp_test_input.jsonl

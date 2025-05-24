@@ -2,7 +2,7 @@
 
 **Sea Flea** is a MCP Server "WASM Runner"
 
-Release `0.0.0`, 🐳 Docker image: `k33g/sea-flea:0.0.0`
+Release `0.0.1`, 🐳 Docker image: `k33g/sea-flea:0.0.1`
 
 ## Overview
 

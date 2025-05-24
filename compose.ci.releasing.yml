@@ -1,0 +1,90 @@
+x-comment: |
+  This compose file is a local ci pipeline for releasing the project
+  Run it with:
+  ```
+  docker compose --file compose.ci.releasing.yml up --build 
+  ```
+
+  ## Remarks
+
+  ### About string interpolation in Docker Compose
+
+  Use `$$` in your Docker Compose scripts when you want to pass a literal dollar sign 
+  or a shell variable reference into your container, 
+  preventing Docker Compose from performing its own variable substitution. 
+  This is essential for writing scripts that rely on shell variable expansion inside the container.
+
+  ### Local workspace folder with devcontainer
+
+  When using this compose file with a devcontainer, 
+  the `LOCAL_WORKSPACE_FOLDER` environment variable can be used to specify the local folder 
+
+services:
+  # Multi architecture builds of the Golang MCP server
+  generate-binaries:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM golang:1.24.3-alpine
+        WORKDIR /app
+        COPY . .
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-./}/release/binaries:/binaries
+    environment:
+      - VERSION=${VERSION}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "📦 Building MCP Runner..."
+        build_sea_flea() {
+            TARGETOS=$1
+            TARGETARCH=$2
+            echo "⏳ Building for $${TARGETOS}/$${TARGETARCH}..."
+            GOOS=$${TARGETOS} GOARCH=$${TARGETARCH} go build -o sea-flea-${VERSION}-$${TARGETOS}-$${TARGETARCH}
+            mv sea-flea-${VERSION}-$${TARGETOS}-$${TARGETARCH} /binaries/
+            # TODO add checks here
+        }
+        go mod tidy
+        mkdir -p /binaries
+
+        build_sea_flea "linux" "amd64"
+        build_sea_flea "linux" "arm64"
+        build_sea_flea "darwin" "amd64"
+        build_sea_flea "darwin" "arm64"
+
+        if [ $? -eq 0 ]; then
+          echo "🟢 Go binary built and copied to volume successfully"
+        else
+          echo "🔴 Go build failed"
+        fi
+    
+  generate-images:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM docker:cli
+        WORKDIR /app
+        COPY . .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Mount Docker socket
+      - ${LOCAL_WORKSPACE_FOLDER:-./}/:/app
+    environment:
+      - VERSION=${VERSION}
+      - DOCKER_USERNAME=${DOCKER_USERNAME}
+      - DOCKER_PASSWORD=${DOCKER_PASSWORD}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        # Replace <VERSION> in release.docker-bake.tpl.hcl by value of ${VERSION}
+        # This is used to generate the release.docker-bake.hcl file
+
+        sed "s/<VERSION>/$VERSION/g" release.docker-bake.tpl.hcl > release.docker-bake.hcl
+
+        echo "📦 Building Docker images..."
+        # Login to Docker Hub
+        echo "$$DOCKER_PASSWORD" | docker login -u "$$DOCKER_USERNAME" --password-stdin
+        
+        docker buildx bake --push --file release.docker-bake.hcl
+        
