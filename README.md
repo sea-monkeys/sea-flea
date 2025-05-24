@@ -19,321 +19,86 @@ And **Sea Flea** will load the plugin(s) and provide the JSON RPC endpoints.
 > - Streamable HTTP
 > WASM Runtime: [Extism](https://extism.org/) with the [Go SDK](https://github.com/extism/go-sdk) 
 
-## Plugin Architecture
+## Key Components:
 
-The Sea Flea server automatically discovers and loads plugins by:
+**1. Transport Layer**
+- Handles both STDIO and HTTP transports
+- Routes requests to the main request router
 
-1. Scanning for `.wasm` files in the plugins directory
-2. Checking for required exported functions
-3. Registering capabilities with the MCP server
-4. Handling runtime calls to plugin functions
+**2. JSON-RPC Method Routing**
+- Routes different JSON-RPC methods to appropriate handlers
+- Supports MCP protocol methods: initialize, tools/*, resources/*, prompts/*
 
-### Plugin Examples
-<!-- TODO -->
-👀 Have a look to the `./plugins` directory
+**3. WASM Plugin Loading Phase**
+- Scans for `.wasm` files in the plugins directory
+- Checks for exported functions: `tools_information`, `resources_information`, `prompts_information`
+- Registers capabilities with the MCP server
 
-### Key Concepts
+**4. WASM Function Calls**
+- **Tools**: Calls plugin functions like `add`, `hello`, `orc_greetings`, `roll_dices`
+- **Resources**: Returns static content or calls dynamic handlers
+- **Prompts**: Calls prompt functions like `request_information_prompt`, `roll_dices_prompt`
 
-#### Tools
+## Method Mapping:
 
-Tools are interactive functions that can be called by the MCP client. Each tool must:
+| JSON-RPC Method | WASM Plugin Function Called |
+|----------------|----------------------------|
+| `tools/list` | `tools_information()` (during loading) |
+| `tools/call` | `{tool_name}()` (e.g., `add`, `hello`) |
+| `resources/list` | `resources_information()` (during loading) |
+| `resources/read` | Static content or dynamic handler |
+| `prompts/list` | `prompts_information()` (during loading) |
+| `prompts/get` | `{prompt_name}()` (e.g., `roll_dices_prompt`) |
 
-- **Define its schema** in `tools_information()` with name, description, and input schema
-- **Have a corresponding exported function** with `//go:export function_name`
-- **Accept JSON input** via `pdk.InputString()`
-- **Return results** via `pdk.OutputString()`
+The system follows a plugin discovery pattern where WASM plugins expose their capabilities through information functions, and then the runtime calls the actual implementation functions based on JSON-RPC requests.
 
-**Tool Function Pattern:**
-```go
-//go:export your_tool_name
-func YourToolName() {
-    type Arguments struct {
-        Param1 string `json:"param1"`
-        Param2 int    `json:"param2"`
-    }
+## 1. High-Level Architecture Overview
+
+```mermaid
+graph TD
+    A[JSON-RPC Client] --> B{Transport Layer}
+    B -->|STDIO| C[STDIO Handler]
+    B -->|HTTP| D[HTTP Handler]
     
-    arguments := pdk.InputString()
-    var args Arguments
-    json.Unmarshal([]byte(arguments), &args)
+    C --> E[MCP Server Core]
+    D --> E
     
-    // Your logic here
-    result := "Your result"
+    E --> F[Request Router]
+    F --> G[WASM Plugin Manager]
     
-    pdk.OutputString(result)
-}
-```
-
-#### Resources
-
-Resources provide accessible content with URIs. They can be:
-
-- **Static content** (documentation, templates, help text)
-- **Dynamic content** based on configuration
-- **Various formats** (JSON, text, markdown, binary data)
-
-> The dynamic resources are not yet implemented with **Sea Flea**
-
-
-**Resource URI Patterns:**
-- `your-plugin:///resource-name`
-- `config://setting-name`
-- `message:///content-type`
-
-#### Prompts
-
-Prompts are templates that generate conversation messages. They:
-
-- **Define required arguments** with descriptions and types
-- **Generate structured message content** with roles and content
-- **Return an array of messages** for conversation flow
-
-**Prompt Function Pattern:**
-```go
-//go:export your_prompt_name
-func YourPromptName() {
-    type Arguments struct {
-        Param1 string `json:"param1"`
-    }
+    G --> H[Plugin Discovery]
+    G --> I[Function Execution]
     
-    arguments := pdk.InputString()
-    var args Arguments
-    json.Unmarshal([]byte(arguments), &args)
-
-    messages := []Message{
-        {
-            Role: "user",
-            Content: Content{
-                Type: "text",
-                Text: "Your generated prompt text with " + args.Param1,
-            },
-        },
-    }
-
-    jsonData, _ := json.Marshal(messages)
-    pdk.OutputString(string(jsonData))
-}
+    H --> J[Load .wasm Files]
+    I --> K[Call Plugin Functions]
+    
+    style A fill:#e1f5fe
+    style E fill:#f3e5f5
+    style G fill:#e8f5e8
 ```
 
+## 2. WASM Plugin Function Calls by JSON-RPC Request
 
-## Run Sea Flea Server (from code, with `go run`)
+```mermaid
+graph LR
+    A[Call Plugin Functions] --> B{JSON-RPC Request Type}
+    
+    B -->|tools/list| E[Return Available Tools]
+    B -->|tools/call| F[Call plugin tool function with args]
+    B -->|resources/list| G[Return Available Resources]
+    B -->|resources/read| H[Access Resource Content]
+    B -->|prompts/list| I[Return Available Prompts]
+    B -->|prompts/get| J[Call plugin prompt function with args]
+    
+    F --> K[Return tool result]
 
-**STDIO Mode:**
-```bash
-go run main.go --transport stdio --debug --plugins ./plugins
+    H --> L[Return resource content]
+
+    J --> M[Return prompt messages array]
+    
+    style A fill:#e8f5e8
+    style B fill:#fff3e0
+    style F fill:#ffecb3
+    style H fill:#e1f5fe
+    style J fill:#f3e5f5
 ```
-
-**HTTP Mode:**
-```bash
-go run main.go --transport streamable-http --debug --plugins ./plugins
-```
-
-**With Environment Variables:**
-```bash
-WASM_MESSAGE="Custom message" \
-WASM_VERSION="1.0.0" \
-go run main.go --transport streamable-http --plugins ./plugins
-```
-> ✋ the environment variables names must start with `WASM_`
-
-**With Plugin Settings:**
-```bash
-go run main.go --plugins ./plugins --settings '{"difficulty":"hard", "campaign":"storm"}'
-```
-
-### Configuration and Environment from the Plugins side
-
-#### Environment Variables
-
-Plugins can access environment variables starting with `WASM_`:
-
-```go
-message, ok := pdk.GetConfig("WASM_MESSAGE")
-version, ok := pdk.GetConfig("WASM_VERSION")
-```
-
-#### Plugin Settings
-
-Access settings passed via `--settings` flag:
-
-```go
-project, ok := pdk.GetConfig("project")
-difficulty, ok := pdk.GetConfig("difficulty")
-```
-
-#### Plugin Filtering
-
-Filter which plugins to load:
-
-```bash
-# not yet implemented - in progress
-```
-
-## Testing
-
-### STDIO
-<!-- TODO -->
-👀 Have a look to the `./tests/stdio` directory
-
-### HTTP
-<!-- TODO -->
-👀 Have a look to the `./tests/http` directory
-
-
-## Docker Packaging
-
-### Create the **sea-flea** base image:
-
-```bash
-docker buildx bake --push --file release.docker-bake.hcl
-```
-
-
-### Create an **sea-flea** image with you WASM plugins
-> `wasm.release.Dockerfile`
-```Dockerfile
-FROM  k33g/sea-flea:0.0.0
-WORKDIR /app
-
-# Change this part
-COPY plugins/*.wasm ./plugins/
-
-ENTRYPOINT ["./sea-flea"]
-```
-
-Build it (with **Docker Bake** it's easier):
-```hcl
-variable "REPO" {
-  default = "k33g"
-}
-
-variable "TAG" {
-  default = "demo-wasm-files"
-}
-
-group "default" {
-  targets = ["sea-flea"]
-}
-
-target "sea-flea" {
-  context = "."
-  dockerfile = "wasm.release.Dockerfile"
-  args = {}
-  platforms = [
-    "linux/amd64",
-    "linux/arm64"
-  ]
-  tags = ["${REPO}/sea-flea:${TAG}"]
-}
-```
-
-Then run:
-
-```bash
-docker buildx bake --push --file wasm.release.docker-bake.hcl
-```
-
-### Use it with Claude.AI Desktop (STDIO mode)
-
-**Configuration**:
-```json
-{
-    "MCP_SEA_FLEA_DEMO":{
-        "command":"docker","args":[
-          "run", 
-          "--rm", 
-          "-i", 
-          "k33g/sea-flea:demo-wasm-files",
-          "--debug",
-          "--plugins",
-          "./plugins"
-        ]
-    }
-  }
-}
-```
-
-### Test the Sea Flea container with the STDIO transport
-<!-- TODO -->
-👀 Have a look to the `./tests/stdio.container` directory
-
-**Example**: get the list of the tools
-```bash
-# Create a temporary input file with the correct sequence
-cat > /tmp/mcp_test_input.jsonl << 'EOF'
-{
-    "jsonrpc": "2.0", 
-    "id": 0, 
-    "method": "initialize", 
-    "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}
-}
-{
-    "jsonrpc": "2.0", 
-    "method": "notifications/initialized"
-}
-{
-    "jsonrpc": "2.0", 
-    "id": 2, 
-    "method": "tools/list", 
-    "params": {}
-}
-EOF
-
-# Run the server with the input file
-echo "---------------------------------------------------------"
-echo "Running MCP server with proper initialization sequence..."
-echo "---------------------------------------------------------"
-
-# Pipe the input to the server and process output with jq
-cat /tmp/mcp_test_input.jsonl | docker run --rm -i k33g/sea-flea:demo-wasm-files --debug --plugins ./plugins | jq -c '.' | jq -s '.'
-
-# Clean up
-rm /tmp/mcp_test_input.jsonl
-```
-
-### Test the Sea Flea container with the HTTP transport
-
-Start the server with the HTTP transport (with Bearer Token):
-```bash
- docker run --rm -i \
- -e MCP_TOKEN="mcp-is-the-way" \
- -p 5050:5050 \
- k33g/sea-flea:demo-wasm-files \
- --debug \
- --transport streamable-http \
- --plugins ./plugins
-
-```
-
-<!-- TODO -->
-👀 Have a look to the `./tests/http` directory
-
-#### If you are running in devcontainer
-> Tricky part 🥵
-The easiest way to run tests on the MCP Server with the HTTP transport in a container and when working with devcontainer is **Docker Compose**.
-
-👀 Have a look to the `./tests/http.devcontainer` directory
-
-
-## Best Practices
-
-### Plugin Development
-
-1. **Use descriptive names** for tools, resources, and prompts
-2. **Provide detailed descriptions** in schemas
-3. **Handle errors gracefully** with meaningful messages
-4. **Use consistent URI patterns** for resources
-5. **Test thoroughly** with various inputs
-
-### Performance
-
-1. **Keep functions lightweight** - avoid heavy computation
-2. **Use efficient JSON marshaling**
-3. **Cache expensive operations** when possible
-4. **Minimize memory allocations**
-
-### Security
-
-1. **Validate all inputs** before processing
-2. **Sanitize outputs** to prevent injection
-3. **Use safe defaults** for configuration
-4. **Limit resource access** appropriately
