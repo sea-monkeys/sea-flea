@@ -18,6 +18,22 @@ type Resource struct {
 //export resources_information
 func ResourcesInformation() {
 
+	resources := []Resource{
+		{
+			URI:         "about:///sea-flea",
+			Name:        "resource_sample",
+			Description: "This is a resource example",
+			MimeType:    "application/json",
+			//Text:        `{"message": "` + message + `", "version": "` + version + `", "project": "` + project + `", "id": "` + id + `"}`,
+		},
+	}
+	jsonData, _ := json.Marshal(resources)
+	pdk.OutputString(string(jsonData))
+
+}
+
+//go:export resource_sample
+func ResourceSample() {
 	message, okm := pdk.GetConfig("WASM_MESSAGE")
 	if !okm {
 		message = "..."
@@ -37,17 +53,15 @@ func ResourcesInformation() {
 		id = "..."
 	}
 
-
-	resources := []Resource{
-		{
-			URI:         "about:///sea-flea",
-			Name:        "Resource sample",
-			Description: "This is a resource example",
-			MimeType:    "application/json",
-			Text:        `{"message": "` + message + `", "version": "` + version + `", "project": "` + project + `", "id": "` + id + `"}`,
-		},
+	resource := Resource{
+		URI:         "about:///sea-flea",
+		Name:        "resource_sample",
+		Description: "This is a resource example",
+		MimeType:    "application/json",
+		Text:        `{"message": "` + message + `", "version": "` + version + `", "project": "` + project + `", "id": "` + id + `"}`,
 	}
-	jsonData, _ := json.Marshal(resources)
+
+	jsonData, _ := json.Marshal(resource)
 	pdk.OutputString(string(jsonData))
 
 }
